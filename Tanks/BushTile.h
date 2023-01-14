@@ -1,8 +1,7 @@
 #pragma once
-#include <SFML/System/Vector2.hpp>
-#include <SFML/Graphics.hpp>
+#include "Tile.h"
 
-class Tile
+class BushTile : public Tile
 {
 public:
 
@@ -11,12 +10,11 @@ public:
 private:
 
 	bool destroyable = false;
-	bool walkable = false;
-	bool stealth = false;
-	bool pierceable = false;
+	bool walkable = true;
+	bool stealth = true;
+	bool pierceable = true;
 	bool armored = false;
 
 	float move_speed_modificator = 0.f;
-
 };
 

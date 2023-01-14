@@ -91,20 +91,28 @@ XCOPY $(SolutionDir)textures\ $(OutDir) /i /c /k /y /d</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="BrickTile.cpp" />
+    <ClCompile Include="BushTile.cpp" />
     <ClCompile Include="ControllableTank.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GrassTile.cpp" />
     <ClCompile Include="Tank.cpp" />
     <ClCompile Include="Tanks.cpp" />
     <ClCompile Include="Tile.cpp" />
     <ClCompile Include="TileMap.cpp" />
+    <ClCompile Include="WaterTile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
+    <ClInclude Include="BrickTile.h" />
+    <ClInclude Include="BushTile.h" />
     <ClInclude Include="ControllableTank.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GrassTile.h" />
     <ClInclude Include="Tank.h" />
     <ClInclude Include="Tile.h" />
     <ClInclude Include="TileMap.h" />
+    <ClInclude Include="WaterTile.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

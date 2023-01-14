@@ -1,8 +1,7 @@
 #pragma once
-#include <SFML/System/Vector2.hpp>
-#include <SFML/Graphics.hpp>
+#include "Tile.h"
 
-class Tile
+class BrickTile : public Tile
 {
 public:
 
@@ -17,6 +16,5 @@ private:
 	bool armored = false;
 
 	float move_speed_modificator = 0.f;
-
 };
 

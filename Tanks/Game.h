@@ -8,6 +8,7 @@
 #include "ControllableTank.h"
 #include <array>
 #include <algorithm>
+#include <cmath>
 
 class Game
 {

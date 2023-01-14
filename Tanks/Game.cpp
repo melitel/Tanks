@@ -5,6 +5,7 @@ Game* g_Game = nullptr;
 void Game::initialize(uint32_t window_width, uint32_t window_height, std::unique_ptr<sf::RenderWindow> &window)
 {
 	m_input_state.fill(false);
+	m_velocity = sf::Vector2f(0.f, 0.f);
 
 	m_game_win_width = window_width;
 	m_game_win_height = window_height;
@@ -45,7 +46,9 @@ void Game::initialize(uint32_t window_width, uint32_t window_height, std::unique
 
 }
 
-int button_index = -2;
+int first_button_index = -2;
+int second_button_index = -2;
+int third_button_index = -2;
 
 void Game::update()
 {
@@ -58,29 +61,62 @@ void Game::update()
 
 	int inputs_count = count_inputs(m_input_state);
 
+	if (inputs_count == 0)
+	{
+		first_button_index = -2;
+		//m_velocity = sf::Vector2f(0.f, 0.f);
+	}
 	if (inputs_count == 1) {
+		
+		second_button_index = -2;
 		
 		if (m_input_state[input_event::keyboard_event::k_W] == true) 
 		{
-			button_index = 0;
-			m_player_tank.move_tank(sf::Vector2f(0.f, -1.f), delta);
+			first_button_index = 0;
+
+			if (m_velocity == sf::Vector2f(-1.f, 0.f) || m_velocity == sf::Vector2f(1.f, 0.f))
+			{
+				m_player_tank.rotate_tank(sf::degrees(0.f));
+			}
+			
+			m_velocity = sf::Vector2f(0.f, -1.f);
+			m_player_tank.move_tank(m_velocity, delta);
 		}
 		if (m_input_state[input_event::keyboard_event::k_A] == true)
 		{
-			button_index = 1;
-			m_player_tank.rotate_tank(sf::degrees(-90.f));
-			m_player_tank.move_tank(sf::Vector2f(-1.f, 0.f), delta);
+			first_button_index = 1;
+			if (m_velocity != sf::Vector2f(-1.f, 0.f))
+			{
+				m_player_tank.rotate_tank(sf::degrees(-90.f));
+			}
+			
+
+			m_velocity = sf::Vector2f(-1.f, 0.f);
+			m_player_tank.move_tank(m_velocity, delta);
 		}
 		if (m_input_state[input_event::keyboard_event::k_S] == true)
 		{
-			button_index = 2;
-			m_player_tank.move_tank(sf::Vector2f(0.f, 1.f), delta);
+			first_button_index = 2;
+
+			if (m_velocity == sf::Vector2f(-1.f, 0.f) || m_velocity == sf::Vector2f(1.f, 0.f))
+			{
+				m_player_tank.rotate_tank(sf::degrees(0.f));
+			}			
+
+			m_velocity = sf::Vector2f(0.f, 1.f);
+			m_player_tank.move_tank(m_velocity, delta);
 		}
 		if (m_input_state[input_event::keyboard_event::k_D] == true)
 		{
-			button_index = 3;
-			m_player_tank.rotate_tank(sf::degrees(90.f));
-			m_player_tank.move_tank(sf::Vector2f(1.f, 0.f), delta);
+			first_button_index = 3;
+
+			if (m_velocity != sf::Vector2f(1.f, 0.f))
+			{
+				m_player_tank.rotate_tank(sf::degrees(90.f));
+			}			
+
+			m_velocity = sf::Vector2f(1.f, 0.f);
+			m_player_tank.move_tank(m_velocity, delta);
 		}
 	}
 	if (inputs_count == 2) {
@@ -88,17 +124,44 @@ void Game::update()
 		int true_found = -1;
 		int action_to_do = -1;
 
-		for (int i = 0; i < m_input_state.size(); ++i)
+		if (first_button_index >= 0 && second_button_index >= 0 && third_button_index >= 0)
 		{
-			if (m_input_state[i])
+			if (!m_input_state[first_button_index])
 			{
-				true_found = i;
+				first_button_index = second_button_index;
+				second_button_index = third_button_index;
+				third_button_index = -2;
+				action_to_do = second_button_index;
+			}
+			else if (!m_input_state[second_button_index])
+			{
+				second_button_index = third_button_index;
+				third_button_index = -2;
+				action_to_do = second_button_index;
+			}
+			else if (!m_input_state[third_button_index])
+			{
+				third_button_index = -2;
+				action_to_do = second_button_index;
+			}
+			
+		}
+		else 
+		{
+			for (int i = 0; i < m_input_state.size(); ++i)
+			{
+				if (m_input_state[i])
+				{
+					true_found = i;
 
-				if (true_found != button_index) {
-					action_to_do = true_found;
+					if (true_found != first_button_index) {
+						action_to_do = true_found;
+						second_button_index = action_to_do;
+
+					}
 				}
 			}
-		}
+		}		
 
 		if (action_to_do == 0) 
 		{
@@ -121,6 +184,22 @@ void Game::update()
 		
 	}
 	if (inputs_count > 2) {
+
+		int true_found = -1;
+
+		for (int i = 0; i < m_input_state.size(); ++i)
+		{
+			if (m_input_state[i])
+			{
+				true_found = i;
+
+				if (true_found != first_button_index && true_found != second_button_index) {
+					
+					third_button_index = true_found;
+
+				}
+			}
+		}
 
 		//change button index to 2nd button pressed, so when 3d button released to continue moving in second button direction
 		m_player_tank.move_tank(sf::Vector2f(0.f, 0.f), delta);
@@ -224,9 +303,35 @@ int Game::count_inputs(input_array inputs)
 	return numberOfTrue;
 }
 
-
 void Game::calibrate_pos(sf::Vector2f& tank_position)
 {	
+
+	int tileX = ceil((tank_position.x - 16) / 32);
+	int tileY = ceil((tank_position.y - 16) / 32);
+
+	int tileUnderPlayer = m_level[tileY-1][tileX-1];
+
+	//std::cout << tileX << " ; " << tileY << " - " << tileUnderPlayer << std::endl;
+
+
+	if (tileUnderPlayer == 0) {
+
+		std::cout << "Moving on Grass" << std::endl;
+	}
+	if (tileUnderPlayer == 1) {
+
+		std::cout << "Tank is in the Water" << std::endl;
+	}
+	if (tileUnderPlayer == 2) {		
+
+		std::cout << "Tank is in the Bush" << std::endl;
+	}
+	if (tileUnderPlayer == 3) {
+
+		std::cout << "There is a Wall" << std::endl;
+	}
+
+
 	if (tank_position.y < (0 + m_tank_offset))
 	{
 		tank_position.y = 0 + m_tank_offset;
