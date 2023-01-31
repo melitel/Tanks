@@ -1,11 +1,15 @@
 #pragma once
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
+#include "TileMap.h"
+#include "ControllableTank.h"
+#include "AiTank.h"
+#include "Tile.h"
+#include "Projectile.h"
+#include "Animation.h"
 #include <memory>
 #include <iostream>
-#include "TileMap.h"
 #include <fstream>
-#include "ControllableTank.h"
 #include <array>
 #include <algorithm>
 #include <cmath>
@@ -30,7 +34,7 @@ public:
 
 		struct keyboard_event
 		{
-			enum key { k_W, k_A, k_S, k_D, k_size };
+			enum key { k_W, k_A, k_S, k_D, k_Space, k_size };
 			key key_pressed;
 			bool isPressed = false;
 			bool isReleased = false;
@@ -64,22 +68,26 @@ private:
 
 	input_array m_input_state;
 
+	Animation m_animation;
 	ControllableTank m_player_tank;
+	AiTank m_ai_tank;
 
-	uint32_t m_tank_offset = 16;
+	std::vector <Projectile> m_projectile_vector;
+	float m_projectile_distance = 64;
 	
-	void read_level_from_file(const std::string filename);
+	uint32_t m_tank_offset = 16;	
+	
 	int count_inputs(input_array inputs);
 	uint32_t m_level_rows = 19;
-	uint32_t m_level_columns = 27;
-	int m_level[19][27];
+	uint32_t m_level_columns = 27;	
 	sf::Texture m_background_tex;
 	sf::Texture m_start_button_tex;
 	sf::RectangleShape m_menu_background;
 	sf::RectangleShape m_game_background;
 	sf::RectangleShape m_start_button;
 
-	sf::Vector2f m_velocity{ 0.f, 0.f };	
+	sf::Vector2f m_tank_movement_direction{ 0.f, 0.f };	
+	sf::Vector2f m_projectile_movement_direction{ 0.f, -1.f };
 
 	std::chrono::time_point<std::chrono::system_clock> m_time{ std::chrono::system_clock::now() };
 	std::chrono::time_point<std::chrono::system_clock> m_start_time{ std::chrono::system_clock::now() };

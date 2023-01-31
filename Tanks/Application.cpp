@@ -68,6 +68,13 @@ void Application::run()
 					input_key_event.isReleased = false;
 					events.keyboard_events.push_back(input_key_event);
 				}
+				if (event.key.code == sf::Keyboard::Key::Space)
+				{
+					input_key_event.key_pressed = input_key_event.k_Space;
+					input_key_event.isPressed = true;
+					input_key_event.isReleased = false;
+					events.keyboard_events.push_back(input_key_event);
+				}
 			}			
 			
 			if (event.type == sf::Event::KeyReleased)
@@ -99,7 +106,14 @@ void Application::run()
 					input_key_event.isReleased = true;
 					input_key_event.isPressed = false;
 					events.keyboard_events.push_back(input_key_event);
-				}				
+				}
+				if (event.key.code == sf::Keyboard::Key::Space)
+				{
+					input_key_event.key_pressed = input_key_event.k_Space;
+					input_key_event.isPressed = false;
+					input_key_event.isReleased = true;
+					events.keyboard_events.push_back(input_key_event);
+				}
 			}
 
 			// "close requested" event: we close the window

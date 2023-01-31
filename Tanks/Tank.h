@@ -10,24 +10,28 @@ public:
 	void initialize(const sf::Vector2f& pos, const std::string& name);
 	void move_tank(const sf::Vector2f& velocity, float delta);
 	void rotate_tank(sf::Angle angle);
+	sf::Vector2f get_position();
+	sf::FloatRect get_tank_bounds();
 
-protected:
+	Tank(
+		unsigned int health,
+		unsigned int damage,
+		float move_speed
+	) :
+		m_health(health),
+		m_damage(damage),
+		m_move_speed(move_speed)
+	{}
+
+protected:	
 	const uint32_t m_tank_width = 32;
 	const uint32_t m_tank_height = 32;
 	sf::RectangleShape m_tank;
 	sf::Texture m_tank_texture;
-	unsigned int m_health = 0;
-	unsigned int m_damage = 0;
-	float m_move_speed = 15.0;
-	float m_projectile_speed = 0.0;
-	unsigned int m_texture_id;
+	unsigned int m_health;
+	unsigned int m_damage;
+	float m_move_speed;
 	sf::Vector2f m_direction{0.0f, 0.0f};
-	enum projectile_type {
-		one_bullet,
-		tripple_bullet,
-		firing_bullet,
-		freezing_bullet
-	};
 
 };
 

@@ -4,17 +4,11 @@
 class BrickTile : public Tile
 {
 public:
-
-	void update(float dt);
+	BrickTile() :
+		Tile(3, false, false, false, false, false, 0.0) {}
 
 private:
 
-	bool destroyable = false;
-	bool walkable = false;
-	bool stealth = false;
-	bool pierceable = false;
-	bool armored = false;
-
-	float move_speed_modificator = 0.f;
+	
 };
 

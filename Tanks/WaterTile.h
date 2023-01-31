@@ -4,17 +4,11 @@
 class WaterTile : public Tile
 {
 public:
-
-	void update(float dt);
+	WaterTile() :
+		Tile(1, false, false, false, true, false, 0.0) {}
 
 private:
 
-	bool destroyable = false;
-	bool walkable = false;
-	bool stealth = false;
-	bool pierceable = true;
-	bool armored = false;
-
-	float move_speed_modificator = 0.f;
+	
 };
 

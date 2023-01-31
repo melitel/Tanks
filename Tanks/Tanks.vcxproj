@@ -90,12 +90,15 @@ XCOPY $(SolutionDir)textures\ $(OutDir) /i /c /k /y /d</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AiTank.cpp" />
+    <ClCompile Include="Animation.cpp" />
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="BrickTile.cpp" />
     <ClCompile Include="BushTile.cpp" />
     <ClCompile Include="ControllableTank.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GrassTile.cpp" />
+    <ClCompile Include="Projectile.cpp" />
     <ClCompile Include="Tank.cpp" />
     <ClCompile Include="Tanks.cpp" />
     <ClCompile Include="Tile.cpp" />
@@ -103,12 +106,15 @@ XCOPY $(SolutionDir)textures\ $(OutDir) /i /c /k /y /d</Command>
     <ClCompile Include="WaterTile.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AiTank.h" />
+    <ClInclude Include="Animation.h" />
     <ClInclude Include="Application.h" />
     <ClInclude Include="BrickTile.h" />
     <ClInclude Include="BushTile.h" />
     <ClInclude Include="ControllableTank.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GrassTile.h" />
+    <ClInclude Include="Projectile.h" />
     <ClInclude Include="Tank.h" />
     <ClInclude Include="Tile.h" />
     <ClInclude Include="TileMap.h" />

@@ -5,16 +5,12 @@ class GrassTile : public Tile
 {
 public:
 
-	void update(float dt);
+	GrassTile() :
+		Tile(0, false, true, false, true, false, 0.0) {}
+	
 
 private:
 
-	bool destroyable = false;
-	bool walkable = true;
-	bool stealth = false;
-	bool pierceable = false;
-	bool armored = false;
-
-	float move_speed_modificator = 0.f;
+	
 };
 

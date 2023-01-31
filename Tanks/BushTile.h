@@ -4,17 +4,10 @@
 class BushTile : public Tile
 {
 public:
-
-	void update(float dt);
+	BushTile() :
+		Tile(2, true, true, true, true, false, 0.0) {}
 
 private:
 
-	bool destroyable = false;
-	bool walkable = true;
-	bool stealth = true;
-	bool pierceable = true;
-	bool armored = false;
-
-	float move_speed_modificator = 0.f;
 };
 

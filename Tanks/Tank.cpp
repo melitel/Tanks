@@ -10,7 +10,7 @@ void Tank::update(float dt)
 
 void Tank::draw(std::unique_ptr<sf::RenderWindow>& window)
 {
-	window->draw(m_tank);
+	window->draw(m_tank);	
 
 }
 
@@ -26,7 +26,6 @@ void Tank::initialize(const sf::Vector2f& pos, const std::string& name)
 	else {
 		m_tank.setTexture(&m_tank_texture);
 	}
-
 }
 
 void Tank::move_tank(const sf::Vector2f & velocity, float delta) {
@@ -41,9 +40,17 @@ void Tank::move_tank(const sf::Vector2f & velocity, float delta) {
 	//std::cout << p1.x << ";" << p1.y << std::endl;
 }
 
-
-
 void Tank::rotate_tank(sf::Angle angle)
 {	
 	m_tank.setRotation(angle);	
+}
+
+sf::Vector2f Tank::get_position()
+{
+	return m_tank.getPosition();
+}
+
+sf::FloatRect Tank::get_tank_bounds()
+{
+	return m_tank.getGlobalBounds();
 }
