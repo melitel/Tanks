@@ -52,6 +52,7 @@ public:
 	void draw(std::unique_ptr<sf::RenderWindow>& window);
 	void gather_input(input_event events);
 	void calibrate_pos(sf::Vector2f& tank_position);
+	
 	~Game();
 	enum game_state {
 		gs_menu,
@@ -94,6 +95,9 @@ private:
 	std::chrono::time_point<std::chrono::system_clock> start_animation_time = std::chrono::system_clock::now();
 	std::chrono::duration<float> m_total_time{ 0 };
 	std::chrono::duration<float> m_dt{ 0 };
+	bool m_first_bullet_shot = false;
+	std::chrono::duration<float> m_last_projectile_shot{0};
+	
 
 };
 

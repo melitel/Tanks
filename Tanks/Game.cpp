@@ -5,6 +5,7 @@ Game* g_Game = nullptr;
 void Game::initialize(uint32_t window_width, uint32_t window_height, std::unique_ptr<sf::RenderWindow> &window)
 {
 	m_input_state.fill(false);
+	m_first_bullet_shot = false;
 	m_tank_movement_direction = sf::Vector2f(0.f, 0.f);
 	
 	m_game_win_width = window_width;
@@ -345,7 +346,23 @@ void Game::gather_input(input_event events)
 			if (events.keyboard_events[i].isPressed && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_Space)
 			{
 				Projectile projectile(&m_player_tank);
-				m_projectile_vector.push_back(std::move(projectile));
+
+				if (!m_first_bullet_shot) {
+					m_first_bullet_shot = true;					
+					m_last_projectile_shot = m_total_time;
+					
+					m_projectile_vector.push_back(std::move(projectile));
+				}
+				else {
+					if ((m_total_time - m_last_projectile_shot) >= std::chrono::seconds{ 3 }) {
+
+						m_last_projectile_shot = m_total_time;
+						m_projectile_vector.push_back(std::move(projectile));					
+					}
+				
+				}
+				
+				
 			}
 			if (events.keyboard_events[i].isReleased && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_W)
 			{

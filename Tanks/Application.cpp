@@ -1,4 +1,5 @@
 #include "Application.h"
+#include <thread>
 
 std::unique_ptr<Game> Application::m_game = nullptr;
 
@@ -30,11 +31,9 @@ void Application::run()
 			{
 				if (event.mouseButton.button == sf::Mouse::Left)
 				{
-
 					input_mouse_event.left_button_pressed = true;
 					input_mouse_event.position = sf::Mouse::getPosition(*m_window);
 					events.mouse_events.push_back(input_mouse_event);
-
 				}				
 			}
 
@@ -112,7 +111,8 @@ void Application::run()
 					input_key_event.key_pressed = input_key_event.k_Space;
 					input_key_event.isPressed = false;
 					input_key_event.isReleased = true;
-					events.keyboard_events.push_back(input_key_event);
+					events.keyboard_events.push_back(input_key_event);				
+					
 				}
 			}
 
@@ -124,8 +124,11 @@ void Application::run()
 
 		m_game->gather_input(events);
 		m_game->update();
-		m_game->draw(m_window);
+		m_game->draw(m_window);	
 		
 	}
 
 }
+
+
+

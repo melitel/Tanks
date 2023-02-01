@@ -10,7 +10,7 @@ class Application
 public:
 	static void run();
 
-private:	
+private:
 
 	static std::unique_ptr<Game> m_game;
 
@@ -18,7 +18,6 @@ private:
 
 	static const uint32_t m_window_width;
 	static const uint32_t m_window_height;
-
 
 };
 
