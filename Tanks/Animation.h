@@ -28,7 +28,7 @@ private:
 	const uint32_t m_texture_width = 64;
 	const uint32_t m_texture_height = 64;
 	uint32_t m_frame_id{ 0 };
-	uint32_t m_frames_count{ 7 };
+	uint32_t m_frames_count{ 8 };
 	uint32_t m_animation_id{ 0 };
 
 };

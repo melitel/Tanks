@@ -8,5 +8,6 @@ public:
 	ControllableTank() :
 		Tank(10, 1, 50.f) {}
 
+	void update(float dt);
 };
 

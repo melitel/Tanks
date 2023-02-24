@@ -4,9 +4,10 @@
 #include "TileMap.h"
 #include "ControllableTank.h"
 #include "AiTank.h"
-#include "Tile.h"
 #include "Projectile.h"
 #include "Animation.h"
+#include "Base.h"
+#include "BrainAtk.h"
 #include <memory>
 #include <iostream>
 #include <fstream>
@@ -72,8 +73,12 @@ private:
 	Animation m_animation;
 	ControllableTank m_player_tank;
 	AiTank m_ai_tank;
+	Base m_player_base;
+	Base m_ai_base;
+	BrainAtk m_brain;
 
 	std::vector <Projectile> m_projectile_vector;
+	std::vector <AiTank> m_ai_vector;
 	float m_projectile_distance = 64;
 	
 	uint32_t m_tank_offset = 16;	

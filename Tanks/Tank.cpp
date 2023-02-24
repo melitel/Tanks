@@ -3,11 +3,6 @@
 
 extern Game* g_Game;
 
-void Tank::update(float dt)
-{
-	
-}
-
 void Tank::draw(std::unique_ptr<sf::RenderWindow>& window)
 {
 	window->draw(m_tank);	
@@ -37,7 +32,7 @@ void Tank::move_tank(const sf::Vector2f & velocity, float delta) {
 	g_Game->calibrate_pos(p1);
 
 	m_tank.setPosition(p1);
-	//std::cout << p1.x << ";" << p1.y << std::endl;
+	std::cout << p1.x << ";" << p1.y << std::endl;
 }
 
 void Tank::rotate_tank(sf::Angle angle)
@@ -53,4 +48,30 @@ sf::Vector2f Tank::get_position()
 sf::FloatRect Tank::get_tank_bounds()
 {
 	return m_tank.getGlobalBounds();
+}
+
+Tank& Tank::operator=(Tank& other)
+{
+	m_tank = other.m_tank;
+	m_health = other.m_health;
+	return *this;
+}
+
+Tank::Tank(const Tank& other)
+{
+	m_tank = other.m_tank;
+	m_health = other.m_health;
+}
+
+Tank& Tank::operator=(Tank&& other) noexcept
+{
+	std::swap(m_tank, other.m_tank);
+	std::swap(m_health, other.m_health);
+	return *this;
+}
+
+Tank::Tank(Tank&& other) noexcept
+{
+	std::swap(m_tank, other.m_tank);
+	std::swap(m_health, other.m_health);
 }

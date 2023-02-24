@@ -93,6 +93,8 @@ XCOPY $(SolutionDir)textures\ $(OutDir) /i /c /k /y /d</Command>
     <ClCompile Include="AiTank.cpp" />
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="Base.cpp" />
+    <ClCompile Include="BrainAtk.cpp" />
     <ClCompile Include="BrickTile.cpp" />
     <ClCompile Include="BushTile.cpp" />
     <ClCompile Include="ControllableTank.cpp" />
@@ -109,6 +111,8 @@ XCOPY $(SolutionDir)textures\ $(OutDir) /i /c /k /y /d</Command>
     <ClInclude Include="AiTank.h" />
     <ClInclude Include="Animation.h" />
     <ClInclude Include="Application.h" />
+    <ClInclude Include="Base.h" />
+    <ClInclude Include="BrainAtk.h" />
     <ClInclude Include="BrickTile.h" />
     <ClInclude Include="BushTile.h" />
     <ClInclude Include="ControllableTank.h" />

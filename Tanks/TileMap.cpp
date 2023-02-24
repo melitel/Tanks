@@ -128,9 +128,36 @@ sf::Vector2f TileMap::get_tile_coordinates(int x, int y)
 {
 	int tileX = x / m_tile_size.x;
 	int tileY = y / m_tile_size.y;
-	sf::Vector2f get_tile_id(tileX, tileY);
+	sf::Vector2f get_tile_coordinates(tileX, tileY);
 
-	return get_tile_id;
+	return get_tile_coordinates;
 
 }
+
+bool TileMap::get_tile_walkable_by_indices(int x, int y)
+{
+	bool get_tile_walkable = m_tiles_map[y][x]->get_walkable();
+
+	return get_tile_walkable;
+}
+
+
+int TileMap::get_rows()
+{
+	return m_height;
+}
+
+int TileMap::get_columns()
+{
+	return m_width;
+}
+
+sf::Vector2u TileMap::get_tile_size()
+{
+	return m_tile_size;
+}
+
+
+
+
 

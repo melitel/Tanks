@@ -5,7 +5,8 @@
 class Tank
 {
 public:
-	void update(float dt);
+
+	virtual void update(float dt) = 0;
 	void draw(std::unique_ptr<sf::RenderWindow>& window);
 	void initialize(const sf::Vector2f& pos, const std::string& name);
 	void move_tank(const sf::Vector2f& velocity, float delta);
@@ -23,7 +24,13 @@ public:
 		m_move_speed(move_speed)
 	{}
 
-protected:	
+	Tank& operator=(Tank&& other) noexcept;
+	Tank(Tank&& other) noexcept;
+
+protected:
+
+	Tank& operator=(Tank& other);
+	Tank(const Tank& other);
 	const uint32_t m_tank_width = 32;
 	const uint32_t m_tank_height = 32;
 	sf::RectangleShape m_tank;

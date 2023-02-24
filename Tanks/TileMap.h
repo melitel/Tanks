@@ -15,6 +15,10 @@ public:
 	void read_level_from_file(const std::string filename);
 	bool get_tile_walkable_by_coordinates(int x, int y);
 	sf::Vector2f get_tile_coordinates(int x, int y);
+	bool get_tile_walkable_by_indices(int x, int y);
+	int get_rows();
+	int get_columns();
+	sf::Vector2u get_tile_size();	
 
 private:
 	
