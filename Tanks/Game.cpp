@@ -50,11 +50,11 @@ void Game::initialize(uint32_t window_width, uint32_t window_height, std::unique
 	sf::Vector2f ai_tank_tile_coordinates = m_map->get_tile_coordinates((ai_tank_position.x - m_tank_offset), (ai_tank_position.y - m_tank_offset));
 	sf::Vector2f m_player_base_position = m_player_base.get_position();
 	sf::Vector2f player_base_tile_coordinates = m_map->get_tile_coordinates(m_player_base_position.x, m_player_base_position.y);
+	
+	g_Game = this;		
 
-	g_Game = this;
+	m_ai_tank.get_path(ai_tank_tile_coordinates.x, ai_tank_tile_coordinates.y, player_base_tile_coordinates.x, player_base_tile_coordinates.y);
 
-	m_brain.a_star((int)ai_tank_tile_coordinates.x, (int)ai_tank_tile_coordinates.y, (int)player_base_tile_coordinates.x, (int)player_base_tile_coordinates.y);
-		
 }
 
 int first_button_index = -2;
@@ -68,6 +68,11 @@ void Game::update()
 	m_time = t;
 	m_total_time = t - m_start_time;
 	float delta = std::min(m_dt.count(), 1.f / 30.f);
+
+	if (m_game_state == game_state::gs_game_start) {
+
+		m_ai_tank.move_tank(sf::Vector2f(0.f, 1.f), delta);
+	}	
 
 	int inputs_count = count_inputs(m_input_state);	
 
@@ -125,7 +130,7 @@ void Game::update()
 			m_tank_movement_direction = sf::Vector2f(0.f, 1.f);
 			m_projectile_movement_direction = m_tank_movement_direction;
 			m_player_tank.move_tank(m_tank_movement_direction, delta);
-			m_ai_tank.move_tank(sf::Vector2f(0.f, 1.f), delta);
+			//m_ai_tank.move_tank(sf::Vector2f(0.f, 1.f), delta);
 		}
 		if (m_input_state[input_event::keyboard_event::k_D] == true)
 		{

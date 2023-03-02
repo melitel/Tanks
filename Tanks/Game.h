@@ -7,7 +7,6 @@
 #include "Projectile.h"
 #include "Animation.h"
 #include "Base.h"
-#include "BrainAtk.h"
 #include <memory>
 #include <iostream>
 #include <fstream>
@@ -75,7 +74,6 @@ private:
 	AiTank m_ai_tank;
 	Base m_player_base;
 	Base m_ai_base;
-	BrainAtk m_brain;
 
 	std::vector <Projectile> m_projectile_vector;
 	std::vector <AiTank> m_ai_vector;

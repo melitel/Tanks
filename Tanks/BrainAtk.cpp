@@ -25,16 +25,16 @@ std::vector<BrainAtk::Node*> BrainAtk::get_neighbors(Node *n)
     int cols = g_Game->m_map->get_columns();
 
     if (x > 0 && tile_walkable(x - 1, y)) {
-        neighbors.push_back(create_node(x -1, y, n));
+        neighbors.push_back(create_node(x -1, y, n, 3));
     }
     if (x < rows - 1 && tile_walkable(x + 1, y)) {
-        neighbors.push_back(create_node(x + 1, y, n));
+        neighbors.push_back(create_node(x + 1, y, n, 2));
     }
     if (y > 0 && tile_walkable(x, y - 1)) {
-        neighbors.push_back(create_node(x, y -1, n));
+        neighbors.push_back(create_node(x, y -1, n, 0));
     }
     if (y < cols - 1 && tile_walkable(x, y + 1)) {
-        neighbors.push_back(create_node(x, y+1, n));
+        neighbors.push_back(create_node(x, y+1, n, 1));
     }
     return neighbors;
 }
@@ -46,8 +46,8 @@ std::vector<BrainAtk::Node> BrainAtk::a_star(int start_x, int start_y, int goal_
     std::priority_queue<Node*, std::vector<Node*>, decltype(cmp)> frontier(cmp);
 
 
-    Node *start = create_node(start_x, start_y, nullptr);
-    Node *goal = create_node(goal_x, goal_y, nullptr);
+    Node *start = create_node(start_x, start_y, nullptr, 1);
+    Node *goal = create_node(goal_x, goal_y, nullptr, 1);
     frontier.push(start);
 
     
@@ -90,12 +90,7 @@ std::vector<BrainAtk::Node> BrainAtk::a_star(int start_x, int start_y, int goal_
                 neighbor->g = new_g;
                 neighbor->h = heuristic(neighbor, goal_x, goal_y);
                 neighbor->f = neighbor->g + neighbor->h;
-                
-                //воно працює, але проблема new в тому, що під нього я виділяю пам'ять, а потім її не очищую. 
-                //є варіант створити окремий вектор з координатами шляху, а не нодами
-                //Node* new_parent = new Node(current);  // Create new Node object on the heap
-                //neighbor->parent = new_parent;          // Assign address of new object to parent
-
+              
                 neighbor->parent = current;
 
                 frontier.push(neighbor);

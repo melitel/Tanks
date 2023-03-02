@@ -9,7 +9,7 @@ public:
 	virtual void update(float dt) = 0;
 	void draw(std::unique_ptr<sf::RenderWindow>& window);
 	void initialize(const sf::Vector2f& pos, const std::string& name);
-	void move_tank(const sf::Vector2f& velocity, float delta);
+	virtual void move_tank(const sf::Vector2f& velocity, float delta);
 	void rotate_tank(sf::Angle angle);
 	sf::Vector2f get_position();
 	sf::FloatRect get_tank_bounds();
