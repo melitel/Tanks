@@ -27,14 +27,14 @@ std::vector<BrainAtk::Node*> BrainAtk::get_neighbors(Node *n)
     if (x > 0 && tile_walkable(x - 1, y)) {
         neighbors.push_back(create_node(x -1, y, n, 3));
     }
-    if (x < rows - 1 && tile_walkable(x + 1, y)) {
+    if (x < (cols - 1) && tile_walkable(x + 1, y)) {
         neighbors.push_back(create_node(x + 1, y, n, 2));
     }
     if (y > 0 && tile_walkable(x, y - 1)) {
-        neighbors.push_back(create_node(x, y -1, n, 0));
+        neighbors.push_back(create_node(x, y -1, n, 1));
     }
-    if (y < cols - 1 && tile_walkable(x, y + 1)) {
-        neighbors.push_back(create_node(x, y+1, n, 1));
+    if (y < (rows - 1) && tile_walkable(x, y + 1)) {
+        neighbors.push_back(create_node(x, y+1, n, 0));
     }
     return neighbors;
 }
@@ -45,16 +45,29 @@ std::vector<BrainAtk::Node> BrainAtk::a_star(int start_x, int start_y, int goal_
     auto cmp = [](Node* left, Node* right) { return left->f > right->f; };
     std::priority_queue<Node*, std::vector<Node*>, decltype(cmp)> frontier(cmp);
 
-
-    Node *start = create_node(start_x, start_y, nullptr, 1);
-    Node *goal = create_node(goal_x, goal_y, nullptr, 1);
+    sf::Angle ai_tank_angle = g_Game->m_ai_tank.getRotation();
+    int direction = 1;
+    if (ai_tank_angle == sf::degrees(0.f)) {
+        direction = 0;    
+    }
+    if (ai_tank_angle == sf::degrees(-90.f)) {
+        direction = 2;
+    }
+    if (ai_tank_angle == sf::degrees(90.f)) {
+        direction = 3;
+    }
+    if (ai_tank_angle == sf::degrees(-180.f)) {
+        direction = 1;
+    }
+    Node *start = create_node(start_x, start_y, nullptr, direction);
+    Node *goal = create_node(goal_x, goal_y, nullptr, 0);
     frontier.push(start);
 
     
     const int rows = g_Game->m_map->get_rows();
     const int cols = g_Game->m_map->get_columns();
     
-    std::vector<std::vector<int>> visited(rows, std::vector<int>(cols, 0));
+    std::vector<std::vector<int>> visited(cols, std::vector<int>(rows, 0));
     visited[start->x][start->y] = 1;
 
     while (!frontier.empty()) {

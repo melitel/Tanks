@@ -6,8 +6,8 @@ class ControllableTank : public Tank
 public:
 
 	ControllableTank() :
-		Tank(10, 1, 50.f) {}
+		Tank(10, 1, 50.f, 1) {}
 
-	void update(float dt);
+	
 };
 

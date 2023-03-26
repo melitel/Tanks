@@ -33,3 +33,8 @@ sf::Vector2f Base::get_position()
 {
 	return m_base.getPosition();
 }
+
+sf::FloatRect Base::get_bounds()
+{	
+	return m_base.getGlobalBounds();
+}

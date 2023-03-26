@@ -17,9 +17,10 @@
 class Game
 {
 
-public:	
-	
+public:
+
 	std::unique_ptr<TileMap> m_map;
+	AiTank m_ai_tank;
 
 	struct input_event {
 
@@ -43,7 +44,7 @@ public:
 		std::vector <mouse_event> mouse_events;
 		std::vector <keyboard_event> keyboard_events;
 
-	};	
+	};
 
 	input_event events;
 
@@ -52,7 +53,7 @@ public:
 	void draw(std::unique_ptr<sf::RenderWindow>& window);
 	void gather_input(input_event events);
 	void calibrate_pos(sf::Vector2f& tank_position);
-	
+
 	~Game();
 	enum game_state {
 		gs_menu,
@@ -71,15 +72,17 @@ private:
 
 	Animation m_animation;
 	ControllableTank m_player_tank;
-	AiTank m_ai_tank;
-	Base m_player_base;
-	Base m_ai_base;
+
+	Base m_player_base{ 50, 10, 1 };
+	Base m_ai_base{50, 10, 0};
 
 	std::vector <Projectile> m_projectile_vector;
 	std::vector <AiTank> m_ai_vector;
 	float m_projectile_distance = 64;
 	
-	uint32_t m_tank_offset = 16;	
+	uint32_t m_tank_offset = 16;
+	uint32_t m_base_offset_x = 24;
+	uint32_t m_base_offset_y = 28;
 	
 	int count_inputs(input_array inputs);
 	uint32_t m_level_rows = 19;
@@ -90,16 +93,15 @@ private:
 	sf::RectangleShape m_game_background;
 	sf::RectangleShape m_start_button;
 
-	sf::Vector2f m_tank_movement_direction{ 0.f, 0.f };	
-	sf::Vector2f m_projectile_movement_direction{ 0.f, -1.f };
-
 	std::chrono::time_point<std::chrono::system_clock> m_time{ std::chrono::system_clock::now() };
 	std::chrono::time_point<std::chrono::system_clock> m_start_time{ std::chrono::system_clock::now() };
 	std::chrono::time_point<std::chrono::system_clock> start_animation_time = std::chrono::system_clock::now();
 	std::chrono::duration<float> m_total_time{ 0 };
 	std::chrono::duration<float> m_dt{ 0 };
 	bool m_first_bullet_shot = false;
+	bool m_first_ai_bullet_shot = false;
 	std::chrono::duration<float> m_last_projectile_shot{0};
+	std::chrono::duration<float> m_last_ai_projectile_shot{ 0 };
 	
 
 };

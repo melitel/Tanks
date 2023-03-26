@@ -3,6 +3,10 @@
 
 extern Game* g_Game;
 
+void Tank::update(float dt)
+{
+}
+
 void Tank::draw(std::unique_ptr<sf::RenderWindow>& window)
 {
 	window->draw(m_tank);	
@@ -23,10 +27,38 @@ void Tank::initialize(const sf::Vector2f& pos, const std::string& name)
 	}
 }
 
-void Tank::move_tank(const sf::Vector2f & velocity, float delta) {
+void Tank::move_tank(movement_direction direction, float delta) {
+
+	switch (direction) {
+	case up:
+		m_direction = sf::Vector2f(0.f, -1.f);
+		rotate_tank(sf::degrees(0.f));
+		break;
+	case left:
+		m_direction = sf::Vector2f(-1.f, 0.f);
+		rotate_tank(sf::degrees(-90.f));
+		break;
+	case right:
+		m_direction = sf::Vector2f(1.f, 0.f);
+		rotate_tank(sf::degrees(90.f));
+		break;
+	case down:
+		m_direction = sf::Vector2f(0.f, 1.f);
+		rotate_tank(sf::degrees(180.f));
+		break;
+	case stop:
+		m_direction = sf::Vector2f(0.f, 0.f);		
+		break;
+	default:
+		// handle invalid status value
+		m_direction = sf::Vector2f(0.f, 0.f);
+		break;
+	}
+
+
 			
 	sf::Vector2f p0 = m_tank.getPosition();
-	sf::Vector2f vel = velocity * m_move_speed;
+	sf::Vector2f vel = m_direction * m_move_speed;
 	sf::Vector2f p1 = p0 + delta * vel;
 
 	g_Game->calibrate_pos(p1);
@@ -48,6 +80,16 @@ sf::Vector2f Tank::get_position()
 sf::FloatRect Tank::get_tank_bounds()
 {
 	return m_tank.getGlobalBounds();
+}
+
+sf::Angle Tank::getRotation()
+{
+	return m_tank.getRotation();
+}
+
+uint32_t Tank::get_team_id()
+{
+	return m_team_id;
 }
 
 Tank& Tank::operator=(Tank& other)
