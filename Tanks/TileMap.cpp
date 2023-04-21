@@ -141,6 +141,13 @@ bool TileMap::get_tile_walkable_by_indices(int x, int y)
 	return get_tile_walkable;
 }
 
+bool TileMap::get_tile_view_through_by_indices(int x, int y)
+{
+	bool get_tile_view_through = m_tiles_map[y][x]->get_visible();
+
+	return get_tile_view_through;
+}
+
 
 int TileMap::get_rows()
 {

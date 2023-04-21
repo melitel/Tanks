@@ -9,6 +9,7 @@ public:
 	void update(float dt);
 	int get_id();
 	bool get_walkable();
+	bool get_visible();
 
 	Tile (
 		int tileID,
@@ -17,6 +18,7 @@ public:
 		bool stealth,
 		bool pierceable,
 		bool armored,
+		bool view_through,
 		float move_speed_modificator
 	) :
 		m_tileID(tileID),
@@ -25,6 +27,7 @@ public:
 		m_stealth(stealth),
 		m_pierceable(pierceable),
 		m_armored(armored),
+		m_view_through(view_through),
 		m_move_speed_modificator(move_speed_modificator)
 	{}
 
@@ -36,6 +39,7 @@ protected:
 	bool m_stealth;
 	bool m_pierceable;
 	bool m_armored;
+	bool m_view_through;
 
 	float m_move_speed_modificator;
 

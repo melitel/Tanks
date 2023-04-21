@@ -1,5 +1,8 @@
 #include "AiTank.h"
+#include <iostream>
+#include "Game.h"
 
+extern Game* g_Game;
 
 void AiTank::initialize(const sf::Vector2f& pos, const std::string& name)
 {
@@ -11,188 +14,24 @@ void AiTank::initialize(const sf::Vector2f& pos, const std::string& name)
 
 void AiTank::change_status(ai_status status)
 {	
+	if (m_ai_status != status) {
+		std::cout << status << std::endl;
+	}
 	m_ai_status = status;
 }
 
 void AiTank::update(float dt) {
 
-	sf::Vector2f velocity;
-	sf::Vector2f p0 = m_tank.getPosition();
-	sf::Vector2f goal_coordinates = sf::Vector2f(m_path.back().x, m_path.back().y);
-	//tile for left corner
-	int tileX_l = (p0.x - m_offset) / 32;
-	//tileX for right corner
-	int tileX_r = (p0.x + (m_offset - 1)) / 32;
-	//tileY top corner
-	int tileY_t = (p0.y - m_offset) / 32;
-	//tileY bot corner
-	int tileY_b = (p0.y + (m_offset - 1)) / 32;
+	sf::Vector2f ai_tank_position = m_tank.getPosition();
+	sf::Vector2f player_tank_position = g_Game->get_player_position();
+	sf::Vector2f player_base_position = g_Game->get_base_position();
+	sf::Vector2i ai_tank_tile_coord = sf::Vector2i(((ai_tank_position.x - m_offset) / 32), ((ai_tank_position.y - m_offset) / 32));
+	sf::Vector2i player_tank_tile_coord = sf::Vector2i((player_tank_position.x / 32),(player_tank_position.y / 32));
+	sf::Vector2i player_base_tile_coord = sf::Vector2i((player_base_position.x / 32),(player_base_position.y / 32));
 
-	sf::Vector2f tank_upper_left_coord = sf::Vector2f(tileX_l, tileY_t);
-	sf::Vector2f tank_upper_right_coord = sf::Vector2f(tileX_r, tileY_t);
-	sf::Vector2f tank_bottom_left_coord = sf::Vector2f(tileX_l, tileY_b);
-
-
-	for (int i = 0; i < m_path.size(); ++i) {
-
-		sf::Vector2f path_coordinates = sf::Vector2f(m_path[i].x, m_path[i].y);
-
-		if (tank_upper_left_coord == path_coordinates) {
-			//aiTank reached base and changes status to "attacking base"
-			//fix the player tank offset problem
-			if (tank_upper_left_coord.x == goal_coordinates.x && abs(tank_upper_left_coord.y - goal_coordinates.y) <= 2) {
-				velocity = sf::Vector2f(0.f, 0.f);
-				m_ai_status = attacking;
-				break;
-			}
-
-			if (tank_upper_left_coord.y == goal_coordinates.y && abs(tank_upper_left_coord.x - goal_coordinates.x) <= 2) {
-				velocity = sf::Vector2f(0.f, 0.f);
-				m_ai_status = attacking;
-				break;
-			}
-
-
-			if (tank_upper_left_coord == goal_coordinates) {
-
-				if (m_path[i - 1].movement_direction == BrainAtk::Node::direction::south || m_path[i - 1].movement_direction == BrainAtk::Node::direction::east) {
-
-					velocity = sf::Vector2f(0.f, 0.f);
-					break;
-				}
-				else if (m_path[i - 1].movement_direction == BrainAtk::Node::direction::north) {
-
-					if (tank_bottom_left_coord == path_coordinates) {
-
-						velocity = sf::Vector2f(0.f, 0.f);
-						break;
-					}
-					else {
-						velocity = sf::Vector2f(0.f, -1.f);
-					}
-
-				}
-				else if (m_path[i - 1].movement_direction == BrainAtk::Node::direction::west) {
-
-					if (tank_upper_right_coord == path_coordinates) {
-
-						velocity = sf::Vector2f(0.f, 0.f);
-						break;
-					}
-					else {
-						velocity = sf::Vector2f(-1.f, 0.f);
-					}
-
-				}
-			}
-			else {
-
-				if (m_path[i + 1].movement_direction == BrainAtk::Node::direction::east) {
-
-					if (m_path[i].movement_direction == BrainAtk::Node::direction::north) {
-
-						if (tank_bottom_left_coord == path_coordinates) {
-
-							m_tank.setRotation(sf::degrees(-90.f));
-							velocity = sf::Vector2f(1.f, 0.f);
-						}
-						else {
-							velocity = sf::Vector2f(0.f, -1.f);
-						}
-					}
-					else {
-
-						m_tank.setRotation(sf::degrees(-90.f));
-						velocity = sf::Vector2f(1.f, 0.f);
-					}
-				}
-				else if (m_path[i + 1].movement_direction == BrainAtk::Node::direction::west) {
-
-					if (m_path[i].movement_direction == BrainAtk::Node::direction::north) {
-
-						if (tank_bottom_left_coord == path_coordinates) {
-
-							m_tank.setRotation(sf::degrees(90.f));
-							velocity = sf::Vector2f(-1.f, 0.f);
-						}
-						else {
-
-							velocity = sf::Vector2f(0.f, -1.f);
-						}
-
-					}
-					else {
-
-						m_tank.setRotation(sf::degrees(90.f));
-						velocity = sf::Vector2f(-1.f, 0.f);
-					}
-
-				}
-				else if (m_path[i + 1].movement_direction == BrainAtk::Node::direction::south) {
-
-
-					if (m_path[i].movement_direction == BrainAtk::Node::direction::west) {
-
-						if (tank_upper_right_coord == path_coordinates) {
-
-							m_tank.setRotation(sf::degrees(0.f));
-							velocity = sf::Vector2f(0.f, 1.f);
-						}
-						else {
-
-							velocity = sf::Vector2f(-1.f, 0.f);
-						}
-
-					}
-					//else if (m_path[i].movement_direction == BrainAtk::Node::direction::north) {
-
-					//	if (tank_bottom_left_coord == path_coordinates) {
-
-					//		m_tank.setRotation(sf::degrees(0.f));
-					//		velocity = sf::Vector2f(0.f, 1.f);
-					//	}
-					//	else {
-
-					//		velocity = sf::Vector2f(0.f, -1.f);
-					//	}
-
-					//}
-					else {
-
-						m_tank.setRotation(sf::degrees(0.f));
-						velocity = sf::Vector2f(0.f, 1.f);
-					}
-
-				}
-				else if (m_path[i + 1].movement_direction == BrainAtk::Node::direction::north) {
-
-					if (m_path[i].movement_direction == BrainAtk::Node::direction::west) {
-
-						if (tank_upper_right_coord == path_coordinates) {
-
-							m_tank.setRotation(sf::degrees(-180.f));
-							velocity = sf::Vector2f(0.f, -1.f);
-						}
-						else {
-
-							velocity = sf::Vector2f(-1.f, 0.f);
-						}
-					}
-					else {
-
-						m_tank.setRotation(sf::degrees(-180.f));
-						velocity = sf::Vector2f(0.f, -1.f);
-					}
-				}
-			}
-		}
-	}
-
-	sf::Vector2f vel = velocity * m_move_speed;
-	sf::Vector2f p1 = p0 + dt * vel;
-
-	m_tank.setPosition(p1);
-
+	processing_state(ai_tank_tile_coord, player_tank_tile_coord, player_base_tile_coord);
+	change_state(ai_tank_tile_coord, player_tank_tile_coord, player_base_tile_coord);
+	move_controller(dt);
 }
 
 void AiTank::get_path(int start_x, int start_y, int goal_x, int goal_y)
@@ -204,6 +43,210 @@ void AiTank::get_path(int start_x, int start_y, int goal_x, int goal_y)
 void AiTank::move_tank(movement_direction direction, float delta){
 	
 	
+}
+
+void AiTank::move_controller(float delta)
+{	
+	sf::Vector2f p0 = m_tank.getPosition();
+	sf::Vector2f goal_coordinates = sf::Vector2f(m_path.back().x * 32, m_path.back().y * 32);
+
+	sf::Vector2f tank_upper_left_coord = sf::Vector2f((p0.x - m_offset), (p0.y - m_offset));
+
+	float comparison_epsilon = (1.f / 60.f) * m_move_speed;
+
+		sf::Vector2f path_coordinates = sf::Vector2f(m_path[0].x * 32, m_path[0].y * 32);
+
+		if ((abs(tank_upper_left_coord.x - path_coordinates.x) <= comparison_epsilon) && 
+			(abs(tank_upper_left_coord.y - path_coordinates.y) <= comparison_epsilon)) {
+		
+			if ((abs(tank_upper_left_coord.x - goal_coordinates.x) <= comparison_epsilon) &&
+				(abs(tank_upper_left_coord.y - goal_coordinates.y) <= comparison_epsilon)) {
+			
+				m_velocity = sf::Vector2f(0.f, 0.f);
+			}
+			else {
+			
+				if (m_path[1].movement_direction == BrainAtk::Node::direction::east) {
+
+					m_tank.setRotation(sf::degrees(-90.f));
+					m_velocity = sf::Vector2f(1.f, 0.f);
+				}
+				else if (m_path[1].movement_direction == BrainAtk::Node::direction::west) {
+				
+					m_tank.setRotation(sf::degrees(90.f));
+					m_velocity = sf::Vector2f(-1.f, 0.f);
+				}
+				else if (m_path[1].movement_direction == BrainAtk::Node::direction::south) {
+				
+					m_tank.setRotation(sf::degrees(0.f));
+					m_velocity = sf::Vector2f(0.f, 1.f);
+				}
+				else if (m_path[1].movement_direction == BrainAtk::Node::direction::north) {
+				
+					m_tank.setRotation(sf::degrees(-180.f));
+					m_velocity = sf::Vector2f(0.f, -1.f);
+				}
+			}
+		}	
+
+	sf::Vector2f vel = m_velocity * m_move_speed;
+	sf::Vector2f p1 = p0 + delta * vel;
+	m_direction = m_velocity;
+
+	sf::Vector2f mtd = g_Game->separating_axis(g_Game->m_player_tank, g_Game->m_ai_tank, p1);
+
+	m_tank.setPosition(p1 + mtd);
+}
+
+void AiTank::processing_state(sf::Vector2i ai_tank_tile, sf::Vector2i player_tank_tile, sf::Vector2i player_base_tile)
+{
+	sf::Vector2f player_tank_pos = g_Game->get_player_position();
+	sf::Vector2i player_tile_coord = sf::Vector2i(((player_tank_pos.x - m_offset) / 32), ((player_tank_pos.y - m_offset) / 32));
+
+	if (m_ai_status == moving_to_enemy_base) {		
+
+		get_path(ai_tank_tile.x, ai_tank_tile.y, player_base_tile.x, player_base_tile.y);
+
+		//I use floor for base coordinates cause base tiles coordinates are (13.5 , 16.5) and we need to floor them in order to align with tank
+		if (ai_tank_tile.x == player_base_tile.x && abs(ai_tank_tile.y - player_base_tile.y) <= 3) {
+			
+			g_Game->projectile_shoot();
+		}
+		if (ai_tank_tile.y == player_base_tile.y && abs(ai_tank_tile.x - player_base_tile.x) <= 3) {
+
+
+			g_Game->projectile_shoot();
+		}
+
+	}
+	if (m_ai_status == chasing_enemy_tank) {
+
+		get_path(ai_tank_tile.x, ai_tank_tile.y, player_tank_tile.x, player_tank_tile.y);		
+		
+		if (ai_tank_tile.x == player_tile_coord.x && abs(ai_tank_tile.y - player_tile_coord.y) <= 3) {
+			
+			sf::Angle rotation = m_tank.getRotation();
+
+			if (ai_tank_tile.y < player_tile_coord.y) {
+				if (rotation != sf::degrees(0.f)) {
+					m_tank.setRotation(sf::degrees(0.f));
+				}
+			}
+			if (ai_tank_tile.y > player_tile_coord.y) {
+				if (rotation != sf::degrees(-180.f)) {
+					m_tank.setRotation(sf::degrees(-180.f));
+				}
+			}
+			g_Game->projectile_shoot();
+		}
+		if (ai_tank_tile.y == player_tile_coord.y && abs(ai_tank_tile.x - player_tile_coord.x) <= 3) {
+			
+			sf::Angle rotation = m_tank.getRotation();
+
+			if (ai_tank_tile.x < player_tile_coord.x) {
+				if (rotation != sf::degrees(-90.f)) {
+					m_tank.setRotation(sf::degrees(-90.f));
+				}
+			}
+			if (ai_tank_tile.x > player_tile_coord.x) {
+				if (rotation != sf::degrees(90.f)) {
+					m_tank.setRotation(sf::degrees(90.f));
+				}
+			}
+			g_Game->projectile_shoot();
+		}
+		
+	}	
+
+}
+
+
+void AiTank::change_state(sf::Vector2i ai_tank_tile, sf::Vector2i player_tank_tile, sf::Vector2i player_base_tile)
+{
+	//switch to chasing player mode
+	if (ai_tank_tile.x == player_tank_tile.x && ai_tank_tile.y != player_tank_tile.y) {
+
+		int tile_x = ai_tank_tile.x;
+
+		if (ai_tank_tile.y > player_tank_tile.y) {
+
+			bool view_through = true;
+
+			for (int i = ai_tank_tile.y; i >= player_tank_tile.y; --i) {				
+
+				view_through = g_Game->m_map->get_tile_view_through_by_indices(tile_x, i);
+
+				if (!view_through) {
+					break;
+				}
+			}
+
+			if (view_through) {
+				m_ai_status = chasing_enemy_tank;
+			}
+
+		}
+		if (ai_tank_tile.y < player_tank_tile.y) {
+
+			bool view_through = true;
+
+			for (int i = ai_tank_tile.y; i <= player_tank_tile.y; ++i) {
+
+				view_through = g_Game->m_map->get_tile_view_through_by_indices(tile_x, i);
+
+				if (!view_through) {
+					break;
+				}
+			}
+
+			if (view_through) {
+
+				m_ai_status = chasing_enemy_tank;
+			}
+		}
+	}
+	if (ai_tank_tile.y == player_tank_tile.y && ai_tank_tile.x != player_tank_tile.x) {
+
+		int tile_y = ai_tank_tile.y;
+
+		if (ai_tank_tile.x > player_tank_tile.x) {
+
+			bool view_through = true;
+
+			for (int i = ai_tank_tile.x; i >= player_tank_tile.x; --i) {
+
+				view_through = g_Game->m_map->get_tile_view_through_by_indices(i, tile_y);
+
+				if (!view_through) {
+					break;
+				}
+			}
+
+			if (view_through) {
+
+				m_ai_status = chasing_enemy_tank;
+			}
+
+		}
+		if (ai_tank_tile.x < player_tank_tile.x) {
+
+			bool view_through = true;
+
+			for (int i = ai_tank_tile.x; i <= player_tank_tile.x; ++i) {
+
+				view_through = g_Game->m_map->get_tile_view_through_by_indices(i, tile_y);
+
+				if (!view_through) {
+					break;
+				}
+			}
+
+			if (view_through) {
+
+				m_ai_status = chasing_enemy_tank;
+			}
+		}
+	}
 }
 
 

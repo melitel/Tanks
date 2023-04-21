@@ -21,6 +21,7 @@ public:
 
 	std::unique_ptr<TileMap> m_map;
 	AiTank m_ai_tank;
+	ControllableTank m_player_tank;
 
 	struct input_event {
 
@@ -53,6 +54,10 @@ public:
 	void draw(std::unique_ptr<sf::RenderWindow>& window);
 	void gather_input(input_event events);
 	void calibrate_pos(sf::Vector2f& tank_position);
+	sf::Vector2f get_base_position();
+	sf::Vector2f get_player_position();
+	void projectile_shoot();
+	sf::Vector2f separating_axis(const Tank& ai_tank, const Tank& player_tank, sf::Vector2f player_pos);
 
 	~Game();
 	enum game_state {
@@ -63,6 +68,7 @@ public:
 
 private:
 
+
 	uint32_t m_game_win_width;
 	uint32_t m_game_win_height;
 
@@ -71,7 +77,6 @@ private:
 	input_array m_input_state;
 
 	Animation m_animation;
-	ControllableTank m_player_tank;
 
 	Base m_player_base{ 50, 10, 1 };
 	Base m_ai_base{50, 10, 0};

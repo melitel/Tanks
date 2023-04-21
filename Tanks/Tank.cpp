@@ -54,17 +54,17 @@ void Tank::move_tank(movement_direction direction, float delta) {
 		m_direction = sf::Vector2f(0.f, 0.f);
 		break;
 	}
-
-
 			
 	sf::Vector2f p0 = m_tank.getPosition();
 	sf::Vector2f vel = m_direction * m_move_speed;
-	sf::Vector2f p1 = p0 + delta * vel;
+	sf::Vector2f p1 = p0 + (delta * vel);
+	sf::Vector2f mtd = g_Game->separating_axis(g_Game->m_ai_tank, g_Game->m_player_tank, p1);
+	p1 = p1 + mtd;
 
 	g_Game->calibrate_pos(p1);
 
 	m_tank.setPosition(p1);
-	std::cout << p1.x << ";" << p1.y << std::endl;
+	//std::cout << p1.x << ";" << p1.y << std::endl;
 }
 
 void Tank::rotate_tank(sf::Angle angle)
@@ -72,25 +72,49 @@ void Tank::rotate_tank(sf::Angle angle)
 	m_tank.setRotation(angle);	
 }
 
-sf::Vector2f Tank::get_position()
+const sf::Vector2f Tank::get_position() const
 {
 	return m_tank.getPosition();
 }
 
-sf::FloatRect Tank::get_tank_bounds()
+void Tank::set_position(sf::Vector2f pos)
+{
+	m_tank.setPosition(pos);
+}
+
+const sf::FloatRect Tank::get_tank_bounds() const
 {
 	return m_tank.getGlobalBounds();
 }
 
-sf::Angle Tank::getRotation()
+const sf::Angle Tank::getRotation() const
 {
 	return m_tank.getRotation();
 }
 
-uint32_t Tank::get_team_id()
+const sf::Vector2f& Tank::get_direction() const
+{
+	return m_direction;
+}
+
+const sf::Vector2f Tank::get_size() const
+{
+	sf::Vector2f tank_size = m_tank.getSize();
+	return tank_size;
+}
+
+const sf::RectangleShape Tank::get_shape() const
+{
+	sf::RectangleShape tank_shape = m_tank;
+	return tank_shape;
+}
+
+const uint32_t Tank::get_team_id() const
 {
 	return m_team_id;
 }
+
+
 
 Tank& Tank::operator=(Tank& other)
 {

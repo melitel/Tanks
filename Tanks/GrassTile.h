@@ -6,7 +6,7 @@ class GrassTile : public Tile
 public:
 
 	GrassTile() :
-		Tile(0, false, true, false, true, false, 0.0) {}
+		Tile(0, false, true, false, true, false, true, 0.0) {}
 	
 
 private:

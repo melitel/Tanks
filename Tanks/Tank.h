@@ -20,10 +20,14 @@ public:
 	virtual void initialize(const sf::Vector2f& pos, const std::string& name);
 	virtual void move_tank(movement_direction direction, float delta);
 	void rotate_tank(sf::Angle angle);
-	sf::Vector2f get_position();
-	sf::FloatRect get_tank_bounds();
-	sf::Angle getRotation();
-	uint32_t get_team_id();
+	const sf::Vector2f get_position() const;
+	void set_position(sf::Vector2f pos);
+	const sf::FloatRect get_tank_bounds() const;
+	const sf::Angle getRotation() const;
+	const sf::Vector2f& get_direction() const;
+	const sf::Vector2f get_size() const;
+	const sf::RectangleShape get_shape() const;
+	const uint32_t get_team_id() const;
 
 	Tank(
 		unsigned int health,

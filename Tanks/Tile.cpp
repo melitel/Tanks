@@ -16,4 +16,9 @@ bool Tile::get_walkable()
 	return m_walkable;
 }
 
+bool Tile::get_visible()
+{
+	return m_view_through;
+}
+
 

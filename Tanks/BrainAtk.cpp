@@ -85,11 +85,14 @@ std::vector<BrainAtk::Node> BrainAtk::a_star(int start_x, int start_y, int goal_
             }
             path.push_back(*start);
             reverse(path.begin(), path.end());
+            //delete last element from past, so ai will stop tile before goal
+            path.pop_back();
+            //path.pop_back();
 
-            for (int i = 0; i < path.size(); ++i) {
+            /*for (int i = 0; i < path.size(); ++i) {
 
                 std::cout << path[i].x << " - " << path[i].y << std::endl;
-            }
+            }*/
             m_next_free_node = 0;
 
             return path;

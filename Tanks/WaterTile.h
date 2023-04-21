@@ -5,7 +5,7 @@ class WaterTile : public Tile
 {
 public:
 	WaterTile() :
-		Tile(1, false, false, false, true, false, 0.0) {}
+		Tile(1, false, false, false, true, false, true, 0.0) {}
 
 private:
 
