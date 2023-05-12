@@ -8,6 +8,9 @@
 class BrainAtk
 {
 public:
+    BrainAtk() {
+        m_node_pool.resize(14096);
+    }
 
     struct Node {
         int x, y;  // Coordinates of the node
@@ -26,7 +29,7 @@ public:
         }
     };
 
-    std::vector<Node> a_star(int start_x, int start_y, int goal_x, int goal_y);
+    std::vector<Node> a_star(int start_x, int start_y, int target_x, int target_y, int tank_i);
 
 private:        
 
@@ -34,6 +37,7 @@ private:
     int heuristic(Node *current, int goal_x, int goal_y);
 
     std::vector<Node*> get_neighbors(Node *current);
+    std::vector<Node*> get_goal_node(Node* current);
 
     Node* create_node(uint32_t x, uint32_t y, Node* parent, uint32_t direction) {
         Node& node = m_node_pool[m_next_free_node++];
@@ -60,7 +64,7 @@ private:
         return &node;
     }
 
-    std::array<Node, 2048> m_node_pool;
+    std::vector<Node> m_node_pool;
     uint32_t m_next_free_node{0};
 };
 

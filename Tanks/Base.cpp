@@ -2,7 +2,7 @@
 
 void Base::initialize(const sf::Vector2f& pos, const std::string& name)
 {
-	m_base.setOrigin(sf::Vector2f(m_base_height / 2, m_base_width / 2));
+	m_base.setOrigin(sf::Vector2f(float(m_base_height / 2), float(m_base_width / 2)));
 	m_base.setPosition(pos);
 	m_base.setSize(sf::Vector2f((float)m_base_width, (float)m_base_height));
 	if (!m_base_texture.loadFromFile(name))

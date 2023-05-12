@@ -6,6 +6,10 @@ void Game::initialize(uint32_t window_width, uint32_t window_height, std::unique
 {
 	m_input_state.fill(false);
 	m_first_bullet_shot = false;
+	m_kills_count = 0;
+
+	m_ai_tanks.push_back(AiTank(10, 1, 60.f, 0, AiTank::attack));
+	m_ai_tanks.push_back(AiTank(10, 1, 60.f, 0, AiTank::defence));
 	
 	m_game_win_width = window_width;
 	m_game_win_height = window_height;
@@ -40,8 +44,10 @@ void Game::initialize(uint32_t window_width, uint32_t window_height, std::unique
 	}
 
 	m_player_tank.initialize(sf::Vector2f(432.f, 560.f), "commontankup.png");
-	m_ai_tank.initialize(sf::Vector2f(432.f, 48.f), "aitank.png");
-	//m_ai_tank.initialize(sf::Vector2f(432.f, 560.f), "aitank.png");
+
+	for (int i = 0; i < m_ai_tanks.size(); ++i) {		
+		m_ai_tanks[i].initialize(m_ai_spawn_pos[0], "aitank.png");
+	}
 	m_player_base.initialize(sf::Vector2f(432.f, 560.f), "base.png");
 	m_ai_base.initialize(sf::Vector2f(432.f, 48.f), "base.png");
 	m_player_base.rotate_base(sf::degrees(180.f));	
@@ -63,7 +69,11 @@ void Game::update()
 
 	if (m_game_state == game_state::gs_game_start) {
 
-		m_ai_tank.update(delta);
+		if (!m_ai_tanks.empty()) {
+			for (int i = 0; i < m_ai_tanks.size(); ++i) {
+				m_ai_tanks[i].update(delta, i);
+			}					
+		}
 	}	
 
 	int inputs_count = count_inputs(m_input_state);	
@@ -200,8 +210,10 @@ void Game::update()
 			}
 			
 			sf::FloatRect projectile_bounds = m_projectile_vector[i].get_projectile_bounds();
-			sf::FloatRect ai_tank_bounds = m_ai_tank.get_tank_bounds();
-			sf::Vector2f ai_tank_position = m_ai_tank.get_position();
+			sf::FloatRect first_ai_tank_bounds = m_ai_tanks[0].get_tank_bounds();
+			sf::Vector2f first_ai_tank_position = m_ai_tanks[0].get_position();
+			sf::FloatRect second_ai_tank_bounds = m_ai_tanks[1].get_tank_bounds();
+			sf::Vector2f second_ai_tank_position = m_ai_tanks[1].get_position();
 
 			sf::FloatRect ai_base_bounds = m_ai_base.get_bounds();
 			sf::Vector2f ai_base_position = m_ai_base.get_position();
@@ -210,19 +222,66 @@ void Game::update()
 			sf::Vector2f player_tank_position = m_player_tank.get_position();
 
 			sf::FloatRect player_base_bounds = m_player_base.get_bounds();
-			sf::Vector2f player_base_position = m_player_base.get_position();			
+			sf::Vector2f player_base_position = m_player_base.get_position();
 			
 			if (m_projectile_distance <= 0)
 			{
 				std::swap(proj, m_projectile_vector.back());				
 				m_projectile_vector.pop_back();
 			}
-			if (projectile_bounds.findIntersection(ai_tank_bounds) && proj_owner_team_id == 1) {
-				
-				m_animation.play(0, sf::Vector2f(ai_tank_position.x - m_tank_offset, ai_tank_position.y - m_tank_offset), "explosioneffect.png");
+
+			if (projectile_bounds.findIntersection(first_ai_tank_bounds) && proj_owner_team_id == 1) {
+
+				m_animation.play(0, sf::Vector2f(first_ai_tank_position.x - m_tank_offset, first_ai_tank_position.y - m_tank_offset), "explosioneffect.png");
 				std::swap(proj, m_projectile_vector.back());
 				m_projectile_vector.pop_back();
+				m_kills_count += 1;
+
+				if (m_kills_count < 5) {
+
+					if (m_ai_tanks[0].m_tank_attack_type == AiTank::defence) {
+						m_ai_tanks.erase(m_ai_tanks.begin());
+						m_ai_tanks.push_back(AiTank(10, 1, 60.f, 0, AiTank::defence));
+						m_ai_tanks.back().initialize(m_ai_spawn_pos[0], "aitank.png");
+					}
+					else {
+						m_ai_tanks.erase(m_ai_tanks.begin());
+						m_ai_tanks.push_back(AiTank(10, 1, 60.f, 0, AiTank::attack));
+						int position = rand() % 3;
+						m_ai_tanks.back().initialize(m_ai_spawn_pos[position], "aitank.png");
+					}
+				}
+				else {
+					m_ai_tanks.erase(m_ai_tanks.begin());
+				}
 			}
+
+			if (projectile_bounds.findIntersection(second_ai_tank_bounds) && proj_owner_team_id == 1) {
+
+				m_animation.play(0, sf::Vector2f(second_ai_tank_position.x - m_tank_offset, second_ai_tank_position.y - m_tank_offset), "explosioneffect.png");
+				std::swap(proj, m_projectile_vector.back());
+				m_projectile_vector.pop_back();
+				m_kills_count += 1;
+
+				if (m_kills_count < 5) {
+
+					if (m_ai_tanks[1].m_tank_attack_type == AiTank::defence) {
+						m_ai_tanks.erase(m_ai_tanks.end());
+						m_ai_tanks.push_back(AiTank(10, 1, 60.f, 0, AiTank::defence));
+						m_ai_tanks.back().initialize(m_ai_spawn_pos[0], "aitank.png");
+					}
+					else {
+						m_ai_tanks.erase(m_ai_tanks.end());
+						m_ai_tanks.push_back(AiTank(10, 1, 60.f, 0, AiTank::attack));
+						int position = rand() % 3;
+						m_ai_tanks.back().initialize(m_ai_spawn_pos[position], "aitank.png");
+					}
+				}
+				else {
+					m_ai_tanks.erase(m_ai_tanks.end());
+				}
+			}
+
 			if (projectile_bounds.findIntersection(ai_base_bounds) && proj_owner_team_id == 1) {
 
 				m_animation.play(0, sf::Vector2f(ai_base_position.x - m_base_offset_x, ai_base_position.y - m_base_offset_y), "explosioneffect.png");
@@ -265,7 +324,11 @@ void Game::draw(std::unique_ptr<sf::RenderWindow>& window)
 		m_player_base.draw(window);
 		m_ai_base.draw(window);
 		m_player_tank.draw(window);
-		m_ai_tank.draw(window);
+		if (!m_ai_tanks.empty()) {
+			for (int i = 0; i < m_ai_tanks.size(); ++i) {
+				m_ai_tanks[i].draw(window);
+			}			
+		}
 		m_animation.draw(window);
 	}
 
@@ -388,24 +451,20 @@ int Game::count_inputs(input_array inputs)
 void Game::calibrate_pos(sf::Vector2f& tank_position)
 {		
 	bool tile_walkable = false;
-	sf::Vector2f tile_coordinates;	
+	sf::Vector2i tile_coordinates;	
 	sf::Vector2f tank_direction = m_player_tank.get_direction();
-	sf::Vector2f ai_tank_position = m_ai_tank.get_position();
-	sf::Vector2f player_tank_position = m_player_tank.get_position();
-	sf::FloatRect player_tank_bounds = m_player_tank.get_tank_bounds();
-	sf::FloatRect ai_tank_bounds = m_ai_tank.get_tank_bounds();	
 
 	if (tank_direction == sf::Vector2f(0.f, -1.f))
 	{
 		if (tank_position.y < (0 + m_tank_offset))
 		{
-			tank_position.y = 0 + (m_tank_offset + 1);
+			tank_position.y = float (0 + (m_tank_offset + 1));
 		}
 		else {
 
 			//checking top left corner coordinates position
-			tile_walkable = m_map->get_tile_walkable_by_coordinates((tank_position.x - m_tank_offset), (tank_position.y - m_tank_offset));
-			tile_coordinates = m_map->get_tile_coordinates((tank_position.x - m_tank_offset), (tank_position.y - m_tank_offset));
+			tile_walkable = m_map->get_tile_walkable_by_coordinates(int (tank_position.x - m_tank_offset), int (tank_position.y - m_tank_offset));
+			tile_coordinates = m_map->get_tile_coordinates(int (tank_position.x - m_tank_offset), int (tank_position.y - m_tank_offset));
 
 			if (!tile_walkable)
 			{
@@ -413,7 +472,7 @@ void Game::calibrate_pos(sf::Vector2f& tank_position)
 			}
 			else {
 				//checking top right corner coordinates position
-				tile_walkable = m_map->get_tile_walkable_by_coordinates((tank_position.x + m_tank_offset), (tank_position.y - m_tank_offset));
+				tile_walkable = m_map->get_tile_walkable_by_coordinates(int (tank_position.x + m_tank_offset), int (tank_position.y - m_tank_offset));
 
 				if (!tile_walkable)
 				{
@@ -426,13 +485,13 @@ void Game::calibrate_pos(sf::Vector2f& tank_position)
 	{
 		if (tank_position.x < (0 + m_tank_offset))
 		{
-			tank_position.x = 0 + (m_tank_offset + 1);
+			tank_position.x = float(0 + (m_tank_offset + 1));
 		}
 		else {
 		
 			//checking top left corner coordinates position
-			tile_walkable = m_map->get_tile_walkable_by_coordinates((tank_position.x - m_tank_offset), (tank_position.y - m_tank_offset));
-			tile_coordinates = m_map->get_tile_coordinates((tank_position.x - m_tank_offset), (tank_position.y - m_tank_offset));
+			tile_walkable = m_map->get_tile_walkable_by_coordinates(int (tank_position.x - m_tank_offset), int (tank_position.y - m_tank_offset));
+			tile_coordinates = m_map->get_tile_coordinates(int (tank_position.x - m_tank_offset), int (tank_position.y - m_tank_offset));
 
 			if (!tile_walkable)
 			{
@@ -440,7 +499,7 @@ void Game::calibrate_pos(sf::Vector2f& tank_position)
 			}
 			else {
 				//checking bottom left corner coordinates position
-				tile_walkable = m_map->get_tile_walkable_by_coordinates((tank_position.x - m_tank_offset), (tank_position.y + m_tank_offset));
+				tile_walkable = m_map->get_tile_walkable_by_coordinates(int (tank_position.x - m_tank_offset), int (tank_position.y + m_tank_offset));
 
 				if (!tile_walkable)
 				{
@@ -453,13 +512,13 @@ void Game::calibrate_pos(sf::Vector2f& tank_position)
 	{
 		if (tank_position.x > (m_game_win_width - (m_tank_offset + 1)))
 		{
-			tank_position.x = m_game_win_width - (m_tank_offset + 1);
+			tank_position.x = float (m_game_win_width - (m_tank_offset + 1));
 		}
 		else {
 		
 			//checking bottom right corner coordinates position
-			tile_walkable = m_map->get_tile_walkable_by_coordinates((tank_position.x + m_tank_offset), (tank_position.y + m_tank_offset));
-			tile_coordinates = m_map->get_tile_coordinates((tank_position.x + m_tank_offset), (tank_position.y + m_tank_offset));
+			tile_walkable = m_map->get_tile_walkable_by_coordinates(int (tank_position.x + m_tank_offset), int (tank_position.y + m_tank_offset));
+			tile_coordinates = m_map->get_tile_coordinates(int (tank_position.x + m_tank_offset), int (tank_position.y + m_tank_offset));
 
 			if (!tile_walkable)
 			{
@@ -467,7 +526,7 @@ void Game::calibrate_pos(sf::Vector2f& tank_position)
 			}
 			else {
 				//checking top right corner coordinates position
-				tile_walkable = m_map->get_tile_walkable_by_coordinates((tank_position.x + m_tank_offset), (tank_position.y - m_tank_offset));
+				tile_walkable = m_map->get_tile_walkable_by_coordinates(int (tank_position.x + m_tank_offset), int (tank_position.y - m_tank_offset));
 
 				if (!tile_walkable)
 				{
@@ -480,13 +539,13 @@ void Game::calibrate_pos(sf::Vector2f& tank_position)
 	{
 		if (tank_position.y > (m_game_win_height - (m_tank_offset + 1)))
 		{
-			tank_position.y = m_game_win_height - (m_tank_offset + 1);
+			tank_position.y = float (m_game_win_height - (m_tank_offset + 1));
 		}
 		else {
 		
 			//checking bottom right corner coordinates position
-			tile_walkable = m_map->get_tile_walkable_by_coordinates((tank_position.x + m_tank_offset), (tank_position.y + m_tank_offset));
-			tile_coordinates = m_map->get_tile_coordinates((tank_position.x + m_tank_offset), (tank_position.y + m_tank_offset));
+			tile_walkable = m_map->get_tile_walkable_by_coordinates(int (tank_position.x + m_tank_offset), int (tank_position.y + m_tank_offset));
+			tile_coordinates = m_map->get_tile_coordinates(int (tank_position.x + m_tank_offset), int (tank_position.y + m_tank_offset));
 
 			if (!tile_walkable)
 			{
@@ -495,7 +554,7 @@ void Game::calibrate_pos(sf::Vector2f& tank_position)
 			else
 			{
 				//checking bottom left corner coordinates position
-				tile_walkable = m_map->get_tile_walkable_by_coordinates((tank_position.x - m_tank_offset), (tank_position.y + m_tank_offset));
+				tile_walkable = m_map->get_tile_walkable_by_coordinates(int (tank_position.x - m_tank_offset), int (tank_position.y + m_tank_offset));
 
 				if (!tile_walkable)
 				{
@@ -512,16 +571,22 @@ sf::Vector2f Game::get_base_position()
 	return base_position;
 }
 
+sf::Vector2f Game::get_ai_base_position()
+{
+	sf::Vector2f ai_base_position = m_ai_base.get_position();
+	return ai_base_position;
+}
+
 sf::Vector2f Game::get_player_position()
 {
 	sf::Vector2f player_position = m_player_tank.get_position();
 	return player_position;
 }
 
-void Game::projectile_shoot()
+void Game::projectile_shoot(int tank_i)
 {
 	//attack enemy
-	Projectile proj_ai(&m_ai_tank);
+	Projectile proj_ai(&m_ai_tanks[tank_i]);
 
 	if (!m_first_ai_bullet_shot) {
 		m_first_ai_bullet_shot = true;
@@ -535,8 +600,7 @@ void Game::projectile_shoot()
 			m_last_ai_projectile_shot = m_total_time;
 			m_projectile_vector.push_back(std::move(proj_ai));
 		}
-	}
-	
+	}	
 }
 
 sf::Vector2f Game::separating_axis(const Tank& ai_tank, const Tank& player_tank, sf::Vector2f player_pos) {
@@ -549,7 +613,7 @@ sf::Vector2f Game::separating_axis(const Tank& ai_tank, const Tank& player_tank,
 	auto check_collision = [&]() {
 		sf::Vector2f player_pos_topleft = player_pos - sf::Vector2f(m_tank_offset, m_tank_offset);
 		sf::Vector2f ai_pos_topleft = ai_pos - sf::Vector2f(m_tank_offset, m_tank_offset);
-		const float tank_size = m_tank_offset * 1.8;
+		const float tank_size = m_tank_offset * 1.8f;
 		sf::FloatRect bounds_player(player_pos_topleft, sf::Vector2f(tank_size, tank_size));
 		sf::FloatRect bounds_ai(ai_pos_topleft, sf::Vector2f(tank_size, tank_size));
 		

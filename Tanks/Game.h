@@ -20,8 +20,10 @@ class Game
 public:
 
 	std::unique_ptr<TileMap> m_map;
-	AiTank m_ai_tank;
+	std::vector <AiTank> m_ai_tanks;
 	ControllableTank m_player_tank;
+	uint32_t m_level_rows = 19;
+	uint32_t m_level_columns = 27;
 
 	struct input_event {
 
@@ -55,8 +57,9 @@ public:
 	void gather_input(input_event events);
 	void calibrate_pos(sf::Vector2f& tank_position);
 	sf::Vector2f get_base_position();
+	sf::Vector2f get_ai_base_position();
 	sf::Vector2f get_player_position();
-	void projectile_shoot();
+	void projectile_shoot(int tank_i);
 	sf::Vector2f separating_axis(const Tank& ai_tank, const Tank& player_tank, sf::Vector2f player_pos);
 
 	~Game();
@@ -82,16 +85,18 @@ private:
 	Base m_ai_base{50, 10, 0};
 
 	std::vector <Projectile> m_projectile_vector;
-	std::vector <AiTank> m_ai_vector;
+	
+	std::vector <sf::Vector2f> m_ai_spawn_pos{sf::Vector2f((13*32) + 16, (1*32) + 16), 
+		sf::Vector2f((2 * 32) + 16, (7 * 32) + 16), 
+		sf::Vector2f((20 * 32) + 16, (12 * 32) + 16) };
 	float m_projectile_distance = 64;
 	
-	uint32_t m_tank_offset = 16;
-	uint32_t m_base_offset_x = 24;
-	uint32_t m_base_offset_y = 28;
+	float m_tank_offset = 16;
+	float m_base_offset_x = 24;
+	float m_base_offset_y = 28;
 	
 	int count_inputs(input_array inputs);
-	uint32_t m_level_rows = 19;
-	uint32_t m_level_columns = 27;	
+	int m_kills_count = 0;	
 	sf::Texture m_background_tex;
 	sf::Texture m_start_button_tex;
 	sf::RectangleShape m_menu_background;

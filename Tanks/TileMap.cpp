@@ -30,24 +30,24 @@ bool TileMap::load(const std::string& tileset)
 			sf::Vertex* triangle = &m_vertices[(i + j * m_width) * 6];
 
 			// define the 3 corners of the first triangle
-			triangle[0].position = sf::Vector2f(i * m_tile_size.x, j * m_tile_size.y);
-			triangle[1].position = sf::Vector2f((i + 1) * m_tile_size.x, j * m_tile_size.y);
-			triangle[2].position = sf::Vector2f((i + 1) * m_tile_size.x, (j + 1) * m_tile_size.y);
+			triangle[0].position = sf::Vector2f(float(i * m_tile_size.x), float(j * m_tile_size.y));
+			triangle[1].position = sf::Vector2f(float ((i + 1) * m_tile_size.x), float (j * m_tile_size.y));
+			triangle[2].position = sf::Vector2f(float ((i + 1) * m_tile_size.x), float ((j + 1) * m_tile_size.y));
 
 			// define the 3 corners of the second triangle
-			triangle[3].position = sf::Vector2f(i * m_tile_size.x, j * m_tile_size.y);
-			triangle[4].position = sf::Vector2f(i * m_tile_size.x, (j + 1) * m_tile_size.y);
-			triangle[5].position = sf::Vector2f((i + 1) * m_tile_size.x, (j + 1) * m_tile_size.y);
+			triangle[3].position = sf::Vector2f(float (i * m_tile_size.x), float (j * m_tile_size.y));
+			triangle[4].position = sf::Vector2f(float (i * m_tile_size.x), float ((j + 1) * m_tile_size.y));
+			triangle[5].position = sf::Vector2f(float ((i + 1) * m_tile_size.x), float ((j + 1) * m_tile_size.y));
 
 			// define 3 texture coordinates for first triangle
-			triangle[0].texCoords = sf::Vector2f(tu * m_tile_size.x, tv * m_tile_size.y);
-			triangle[1].texCoords = sf::Vector2f((tu + 1) * m_tile_size.x, tv * m_tile_size.y);
-			triangle[2].texCoords = sf::Vector2f((tu + 1) * m_tile_size.x, (tv + 1) * m_tile_size.y);
+			triangle[0].texCoords = sf::Vector2f(float (tu * m_tile_size.x), float (tv * m_tile_size.y));
+			triangle[1].texCoords = sf::Vector2f(float ((tu + 1) * m_tile_size.x), float (tv * m_tile_size.y));
+			triangle[2].texCoords = sf::Vector2f(float ((tu + 1) * m_tile_size.x), float ((tv + 1) * m_tile_size.y));
 
 			// define 3 texture coordinates for second triangle
-			triangle[3].texCoords = sf::Vector2f(tu * m_tile_size.x, tv * m_tile_size.y);
-			triangle[4].texCoords = sf::Vector2f(tu * m_tile_size.x, (tv + 1) * m_tile_size.y);
-			triangle[5].texCoords = sf::Vector2f((tu + 1) * m_tile_size.x, (tv + 1) * m_tile_size.y);
+			triangle[3].texCoords = sf::Vector2f(float (tu * m_tile_size.x), float (tv * m_tile_size.y));
+			triangle[4].texCoords = sf::Vector2f(float (tu * m_tile_size.x), float ((tv + 1) * m_tile_size.y));
+			triangle[5].texCoords = sf::Vector2f(float ((tu + 1) * m_tile_size.x), float ((tv + 1) * m_tile_size.y));
 		}
 
 	return true;
@@ -124,11 +124,11 @@ bool TileMap::get_tile_walkable_by_coordinates(int x, int y)
 	return get_tile_walkable;
 }
 
-sf::Vector2f TileMap::get_tile_coordinates(int x, int y)
+sf::Vector2i TileMap::get_tile_coordinates(int x, int y)
 {
 	int tileX = x / m_tile_size.x;
 	int tileY = y / m_tile_size.y;
-	sf::Vector2f get_tile_coordinates(tileX, tileY);
+	sf::Vector2i get_tile_coordinates(tileX, tileY);
 
 	return get_tile_coordinates;
 

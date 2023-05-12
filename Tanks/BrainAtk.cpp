@@ -39,13 +39,32 @@ std::vector<BrainAtk::Node*> BrainAtk::get_neighbors(Node *n)
     return neighbors;
 }
 
-std::vector<BrainAtk::Node> BrainAtk::a_star(int start_x, int start_y, int goal_x, int goal_y) {
-    
-    // Using lambda to compare elements.
-    auto cmp = [](Node* left, Node* right) { return left->f > right->f; };
-    std::priority_queue<Node*, std::vector<Node*>, decltype(cmp)> frontier(cmp);
+std::vector<BrainAtk::Node*> BrainAtk::get_goal_node(Node* n)
+{
+    std::vector<Node*> goal_nodes;
+    int x = n->x;
+    int y = n->y;
+    int rows = g_Game->m_map->get_rows();
+    int cols = g_Game->m_map->get_columns();
 
-    sf::Angle ai_tank_angle = g_Game->m_ai_tank.getRotation();
+    if (x > 1 && tile_walkable(x - 2, y)) {
+        goal_nodes.push_back(create_node(x - 2, y, nullptr, 3));
+    }
+    if (x < (cols - 2) && tile_walkable(x + 2, y)) {
+        goal_nodes.push_back(create_node(x + 2, y, nullptr, 2));
+    }
+    if (y > 1 && tile_walkable(x, y - 2)) {
+        goal_nodes.push_back(create_node(x, y - 2, nullptr, 1));
+    }
+    if (y < (rows - 2) && tile_walkable(x, y + 2)) {
+        goal_nodes.push_back(create_node(x, y + 2, nullptr, 0));
+    }
+    return goal_nodes;
+}
+
+std::vector<BrainAtk::Node> BrainAtk::a_star(int start_x, int start_y, int target_x, int target_y, int tank_i) {
+    m_next_free_node = 0;
+    sf::Angle ai_tank_angle = g_Game->m_ai_tanks[tank_i].getRotation();
     int direction = 1;
     if (ai_tank_angle == sf::degrees(0.f)) {
         direction = 0;    
@@ -60,60 +79,63 @@ std::vector<BrainAtk::Node> BrainAtk::a_star(int start_x, int start_y, int goal_
         direction = 1;
     }
     Node *start = create_node(start_x, start_y, nullptr, direction);
-    Node *goal = create_node(goal_x, goal_y, nullptr, 0);
-    frontier.push(start);
-
+    Node *target = create_node(target_x, target_y, nullptr, 0);
+    auto goal_nodes = get_goal_node(target);
+    std::vector<Node> path;
     
-    const int rows = g_Game->m_map->get_rows();
-    const int cols = g_Game->m_map->get_columns();
-    
-    std::vector<std::vector<int>> visited(cols, std::vector<int>(rows, 0));
-    visited[start->x][start->y] = 1;
+    for (Node* goal : goal_nodes) {
+        
+        // Using lambda to compare elements.
+        auto cmp = [](Node* left, Node* right) { return left->f > right->f; };
+        std::priority_queue<Node*, std::vector<Node*>, decltype(cmp)> frontier(cmp);
 
-    while (!frontier.empty()) {
-        Node *current = frontier.top();
-        //std::cout << current.x << " - " << current.y << std::endl;
-        frontier.pop();
+        frontier.push(start);
 
-        // Check if the current node is the goal
-        if (current->x == goal->x && current->y == goal->y) {
-            // Construct the path by following the parent pointers
-            std::vector<Node> path;
-            while (current->parent != nullptr) {
-                path.push_back(*current);
-                current = current->parent;
+        const int rows = g_Game->m_map->get_rows();
+        const int cols = g_Game->m_map->get_columns();
+
+        std::vector<std::vector<int>> visited(cols, std::vector<int>(rows, 0));
+        visited[start->x][start->y] = 1;
+
+        while (!frontier.empty()) {
+
+            Node* current = frontier.top();
+            frontier.pop();
+
+            // Check if the current node is the goal
+            if (current->x == goal->x && current->y == goal->y) {
+                // Construct the path by following the parent pointers
+                std::vector<Node> path_temp;
+                while (current->parent != nullptr) {
+                    path_temp.push_back(*current);
+                    current = current->parent;
+                }
+                path_temp.push_back(*start);
+                reverse(path_temp.begin(), path_temp.end());              
+
+                if (path_temp.size() < path.size() || path.size() == 0) {
+                    path = path_temp;
+                }
             }
-            path.push_back(*start);
-            reverse(path.begin(), path.end());
-            //delete last element from past, so ai will stop tile before goal
-            path.pop_back();
-            //path.pop_back();
 
-            /*for (int i = 0; i < path.size(); ++i) {
+            auto neighbors = get_neighbors(current);
+            for (Node* neighbor : neighbors) {
 
-                std::cout << path[i].x << " - " << path[i].y << std::endl;
-            }*/
-            m_next_free_node = 0;
+                int new_g = current->g + 1;
 
-            return path;
-        }
-        auto neighbors = get_neighbors(current);
-        for (Node *neighbor : neighbors) {
+                if (!visited[neighbor->x][neighbor->y] || new_g < neighbor->g) {
+                    neighbor->g = new_g;
+                    neighbor->h = heuristic(neighbor, goal->x, goal->y);
+                    neighbor->f = neighbor->g + neighbor->h;
 
-            int new_g = current->g + 1;
+                    neighbor->parent = current;
 
-            if (!visited[neighbor->x][neighbor->y] || new_g < neighbor->g) {
-                neighbor->g = new_g;
-                neighbor->h = heuristic(neighbor, goal_x, goal_y);
-                neighbor->f = neighbor->g + neighbor->h;
-              
-                neighbor->parent = current;
-
-                frontier.push(neighbor);
-                visited[neighbor->x][neighbor->y] = 1;
+                    frontier.push(neighbor);
+                    visited[neighbor->x][neighbor->y] = 1;
+                }
             }
-        }
+        }    
     }
 
-    return std::vector<Node>();
+    return path;
 }

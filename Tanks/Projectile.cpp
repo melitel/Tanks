@@ -98,6 +98,8 @@ Projectile& Projectile::operator=(Projectile &other)
 {
 	m_owner = other.m_owner;
 	m_projectile = other.m_projectile;
+	m_projectile_distance = other.m_projectile_distance;
+	m_direction = other.m_direction;
 	return *this;
 }
 
@@ -105,6 +107,8 @@ Projectile::Projectile(const Projectile& other)
 {
 	m_owner = other.m_owner;
 	m_projectile = other.m_projectile;
+	m_projectile_distance = other.m_projectile_distance;
+	m_direction = other.m_direction;
 }
 
 Projectile& Projectile::operator=(Projectile&& other) noexcept

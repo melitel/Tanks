@@ -6,7 +6,7 @@ class ControllableTank : public Tank
 public:
 
 	ControllableTank() :
-		Tank(10, 1, 50.f, 1) {}
+		Tank(10, 1, 50.f, 1, attack) {}
 
 	
 };
