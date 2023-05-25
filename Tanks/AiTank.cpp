@@ -4,10 +4,11 @@
 
 extern Game* g_Game;
 
-void AiTank::initialize(const sf::Vector2f& pos, const std::string& name)
+void AiTank::initialize(const sf::Vector2f& pos)
 {
-	Tank::initialize(pos, name);
+	Tank::initialize(pos);
 	m_goal_def_switch = 1;
+	m_first_ai_bullet_shot = false;
 
 	if (m_tank_attack_type == attack) {
 		m_ai_status = moving_to_enemy_base;	
@@ -137,7 +138,7 @@ void AiTank::processing_state(sf::Vector2i ai_tank_tile, sf::Vector2i player_tan
 	sf::Vector2f ai_base_pos = g_Game->get_ai_base_position();
 	sf::Vector2i ai_base_tile = sf::Vector2i(int(ai_base_pos.x / 32), int(ai_base_pos.y / 32));
 	sf::Vector2f player_tank_pos = g_Game->get_player_position();
-	sf::Vector2i player_tile_coord = sf::Vector2i(int ((player_tank_pos.x - m_offset) / 32), int ((player_tank_pos.y - m_offset) / 32));
+	//sf::Vector2i player_tile_coord = sf::Vector2i(int ((player_tank_pos.x - m_offset) / 32), int ((player_tank_pos.y - m_offset) / 32));
 
 	if (m_ai_status == moving_to_enemy_base) {		
 
@@ -151,58 +152,64 @@ void AiTank::processing_state(sf::Vector2i ai_tank_tile, sf::Vector2i player_tan
 				m_tank.setRotation(sf::degrees(0.f));
 			}
 
-			g_Game->projectile_shoot(tank_i);
+			g_Game->projectile_shoot(g_Game->m_ai_tanks[tank_i]);
 		}
 		if (ai_tank_tile.y == player_base_tile.y && abs(ai_tank_tile.x - player_base_tile.x) <= 3) {
 			
 			sf::Angle rotation = m_tank.getRotation();
 
-			if (rotation != sf::degrees(-90.f)) {
-				m_tank.setRotation(sf::degrees(-90.f));
+			if (ai_tank_tile.x < player_base_tile.x) {
+				if (rotation != sf::degrees(-90.f)) {
+					m_tank.setRotation(sf::degrees(-90.f));
+				}
 			}
-
-			g_Game->projectile_shoot(tank_i);
+			if (ai_tank_tile.x > player_tank_tile.x) {
+				if (rotation != sf::degrees(90.f)) {
+					m_tank.setRotation(sf::degrees(90.f));
+				}
+			}
+			g_Game->projectile_shoot(g_Game->m_ai_tanks[tank_i]);
 		}
-
 	}
 	if (m_ai_status == chasing_enemy_tank) {
 
 		get_path(ai_tank_tile.x, ai_tank_tile.y, player_tank_tile.x, player_tank_tile.y, tank_i);
 		
-		if (ai_tank_tile.x == player_tile_coord.x && abs(ai_tank_tile.y - player_tile_coord.y) <= 3) {
+		if (ai_tank_tile.x == player_tank_tile.x && abs(ai_tank_tile.y - player_tank_tile.y) <= 3) {
 			
 			sf::Angle rotation = m_tank.getRotation();
 
-			if (ai_tank_tile.y < player_tile_coord.y) {
+			if (ai_tank_tile.y < player_tank_tile.y) {
 				if (rotation != sf::degrees(0.f)) {
 					m_tank.setRotation(sf::degrees(0.f));
 				}
 			}
-			if (ai_tank_tile.y > player_tile_coord.y) {
+			if (ai_tank_tile.y > player_tank_tile.y) {
 				if (rotation != sf::degrees(-180.f)) {
 					m_tank.setRotation(sf::degrees(-180.f));
 				}
 			}
-			g_Game->projectile_shoot(tank_i);
+			g_Game->projectile_shoot(g_Game->m_ai_tanks[tank_i]);
 		}
-		if (ai_tank_tile.y == player_tile_coord.y && abs(ai_tank_tile.x - player_tile_coord.x) <= 3) {
+		if (ai_tank_tile.y == player_tank_tile.y && abs(ai_tank_tile.x - player_tank_tile.x) <= 3) {
 			
 			sf::Angle rotation = m_tank.getRotation();
 
-			if (ai_tank_tile.x < player_tile_coord.x) {
+			if (ai_tank_tile.x < player_tank_tile.x) {
 				if (rotation != sf::degrees(-90.f)) {
 					m_tank.setRotation(sf::degrees(-90.f));
 				}
 			}
-			if (ai_tank_tile.x > player_tile_coord.x) {
+			if (ai_tank_tile.x > player_tank_tile.x) {
 				if (rotation != sf::degrees(90.f)) {
 					m_tank.setRotation(sf::degrees(90.f));
 				}
 			}
-			g_Game->projectile_shoot(tank_i);
+			g_Game->projectile_shoot(g_Game->m_ai_tanks[tank_i]);
 		}		
 	}
 	if (m_ai_status == defending_base) {
+
 		if (m_goal_def_switch == 1) {
 			get_path(ai_tank_tile.x, ai_tank_tile.y, 0, ai_base_tile.y + 2, tank_i);
 		}
@@ -418,6 +425,28 @@ void AiTank::change_state(sf::Vector2i ai_tank_tile, sf::Vector2i player_tank_ti
 			}
 		}
 }
+
+bool AiTank::if_first_bullet_shot()
+{
+	return m_first_ai_bullet_shot;
+}
+
+void AiTank::first_bullet_shot()
+{
+	m_first_ai_bullet_shot = true;
+}
+
+void AiTank::last_projectile_shot_time(std::chrono::duration<float> time)
+{
+	m_last_ai_projectile_shot = time;
+}
+
+std::chrono::duration<float> AiTank::when_last_projectile_shot()
+{
+	return m_last_ai_projectile_shot;
+}
+
+
 
 
 

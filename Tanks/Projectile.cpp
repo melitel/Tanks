@@ -61,7 +61,13 @@ void Projectile::draw(std::unique_ptr<sf::RenderWindow>& window)
 }
 
 void Projectile::update(float delta)
-{	
+{
+	move_projectile(delta);
+	
+}
+
+void Projectile::move_projectile(float delta)
+{
 	m_projectile.setScale(sf::Vector2f(1.f, 1.f));
 	sf::Vector2f p0 = m_projectile.getPosition();
 	sf::Vector2f vel = m_direction * m_projectile_speed;
@@ -73,6 +79,11 @@ float Projectile::distance_update(float delta)
 {
 	sf::Vector2f vel = m_direction * m_projectile_speed;
 	m_projectile_distance -= delta * vel.length();
+	return m_projectile_distance;
+}
+
+float Projectile::get_projectile_distance()
+{
 	return m_projectile_distance;
 }
 

@@ -5,11 +5,10 @@ Game* g_Game = nullptr;
 void Game::initialize(uint32_t window_width, uint32_t window_height, std::unique_ptr<sf::RenderWindow> &window)
 {
 	m_input_state.fill(false);
-	m_first_bullet_shot = false;
 	m_kills_count = 0;
 
-	m_ai_tanks.push_back(AiTank(10, 1, 60.f, 0, AiTank::attack));
-	m_ai_tanks.push_back(AiTank(10, 1, 60.f, 0, AiTank::defence));
+	m_ai_tanks.push_back(AiTank("aitank.png", 10, 1, 60.f, 0, AiTank::attack));
+	m_ai_tanks.push_back(AiTank("aitank.png", 10, 1, 60.f, 0, AiTank::defence));
 	
 	m_game_win_width = window_width;
 	m_game_win_height = window_height;
@@ -43,10 +42,10 @@ void Game::initialize(uint32_t window_width, uint32_t window_height, std::unique
 		std::cout << "Error";
 	}
 
-	m_player_tank.initialize(sf::Vector2f(432.f, 560.f), "commontankup.png");
+	m_player_tank.initialize(sf::Vector2f(432.f, 560.f));
 
 	for (int i = 0; i < m_ai_tanks.size(); ++i) {		
-		m_ai_tanks[i].initialize(m_ai_spawn_pos[0], "aitank.png");
+		m_ai_tanks[i].initialize(m_ai_spawn_pos[0]);
 	}
 	m_player_base.initialize(sf::Vector2f(432.f, 560.f), "base.png");
 	m_ai_base.initialize(sf::Vector2f(432.f, 48.f), "base.png");
@@ -54,10 +53,6 @@ void Game::initialize(uint32_t window_width, uint32_t window_height, std::unique
 	
 	g_Game = this;
 }
-
-int first_button_index = -2;
-int second_button_index = -2;
-int third_button_index = -2;
 
 void Game::update()
 {
@@ -68,152 +63,23 @@ void Game::update()
 	float delta = std::min(m_dt.count(), 1.f / 30.f);
 
 	if (m_game_state == game_state::gs_game_start) {
+		
+		m_player_tank.update(delta, 0);
 
 		if (!m_ai_tanks.empty()) {
 			for (int i = 0; i < m_ai_tanks.size(); ++i) {
 				m_ai_tanks[i].update(delta, i);
 			}					
 		}
-	}	
-
-	int inputs_count = count_inputs(m_input_state);	
-
-	if (inputs_count == 0)
-	{
-		first_button_index = -2;
 	}
-	if (inputs_count == 1) {
-		
-		second_button_index = -2;
-		
-		if (m_input_state[input_event::keyboard_event::k_W] == true) 
-		{
-			first_button_index = 0;			
-			m_player_tank.move_tank(ControllableTank::movement_direction::up, delta);
-		}
-		if (m_input_state[input_event::keyboard_event::k_A] == true)
-		{
-			first_button_index = 1;			
-			m_player_tank.move_tank(ControllableTank::movement_direction::left, delta);
-		}
-		if (m_input_state[input_event::keyboard_event::k_S] == true)
-		{
-			first_button_index = 2;			
-			m_player_tank.move_tank(ControllableTank::movement_direction::down, delta);
-		}
-		if (m_input_state[input_event::keyboard_event::k_D] == true)
-		{
-			first_button_index = 3;
-			m_player_tank.move_tank(ControllableTank::movement_direction::right, delta);
-
-		}
-	}
-	if (inputs_count == 2) {
-
-		int true_found = -1;
-		int action_to_do = -1;
-
-		if (first_button_index >= 0 && second_button_index >= 0 && third_button_index >= 0)
-		{
-			if (!m_input_state[first_button_index])
-			{
-				first_button_index = second_button_index;
-				second_button_index = third_button_index;
-				third_button_index = -2;
-				action_to_do = second_button_index;
-			}
-			else if (!m_input_state[second_button_index])
-			{
-				second_button_index = third_button_index;
-				third_button_index = -2;
-				action_to_do = second_button_index;
-			}
-			else if (!m_input_state[third_button_index])
-			{
-				third_button_index = -2;
-				action_to_do = second_button_index;
-			}
-			
-		}
-		else 
-		{
-			for (int i = 0; i < m_input_state.size(); ++i)
-			{
-				if (m_input_state[i])
-				{
-					true_found = i;
-
-					if (true_found != first_button_index) {
-						action_to_do = true_found;
-						second_button_index = action_to_do;
-
-					}
-				}
-			}
-		}		
-
-		if (action_to_do == 0) 
-		{			
-			m_player_tank.move_tank(ControllableTank::movement_direction::up, delta);			
-		}
-		if (action_to_do == 1)
-		{				
-			m_player_tank.move_tank(ControllableTank::movement_direction::left, delta);
-		}
-		if (action_to_do == 2)
-		{				
-			m_player_tank.move_tank(ControllableTank::movement_direction::down, delta);
-		}
-		if (action_to_do == 3)
-		{				
-			m_player_tank.move_tank(ControllableTank::movement_direction::right, delta);
-		}
-		
-	}
-	if (inputs_count > 2) {
-
-		int true_found = -1;
-
-		for (int i = 0; i < m_input_state.size(); ++i)
-		{
-			if (m_input_state[i])
-			{
-				true_found = i;
-
-				if (true_found != first_button_index && true_found != second_button_index) {
-					
-					third_button_index = true_found;
-				}
-			}
-		}
-
-		//change button index to 2nd button pressed, so when 3d button released to continue moving in second button direction
-		m_player_tank.move_tank(ControllableTank::movement_direction::stop, delta);
-	}	
-	
-	if (!m_projectile_vector.empty())
-	{
-		m_projectile_distance = 64;
 
 		for (int i = 0; i < m_projectile_vector.size(); i++)
 		{
 			Projectile& proj = m_projectile_vector[i];
 			uint32_t proj_owner_team_id = proj.get_owner_team_id();
+			float projectile_distance = proj.get_projectile_distance();
 
-			if (proj_owner_team_id == 1) {
-				proj.update(delta);
-				m_projectile_distance = proj.distance_update(delta);
-			}
-			else {
-				proj.update(delta);
-				m_projectile_distance = proj.distance_update(delta);
-			}
-			
-			sf::FloatRect projectile_bounds = m_projectile_vector[i].get_projectile_bounds();
-			sf::FloatRect first_ai_tank_bounds = m_ai_tanks[0].get_tank_bounds();
-			sf::Vector2f first_ai_tank_position = m_ai_tanks[0].get_position();
-			sf::FloatRect second_ai_tank_bounds = m_ai_tanks[1].get_tank_bounds();
-			sf::Vector2f second_ai_tank_position = m_ai_tanks[1].get_position();
+			sf::FloatRect projectile_bounds = m_projectile_vector[i].get_projectile_bounds();			
 
 			sf::FloatRect ai_base_bounds = m_ai_base.get_bounds();
 			sf::Vector2f ai_base_position = m_ai_base.get_position();
@@ -223,88 +89,71 @@ void Game::update()
 
 			sf::FloatRect player_base_bounds = m_player_base.get_bounds();
 			sf::Vector2f player_base_position = m_player_base.get_position();
-			
-			if (m_projectile_distance <= 0)
+
+			if (proj_owner_team_id == 1) {
+				proj.update(delta);
+				projectile_distance = proj.distance_update(delta);
+			}
+			else {
+				proj.update(delta);
+				projectile_distance = proj.distance_update(delta);
+			}
+
+			if (projectile_distance <= 0)
 			{
-				std::swap(proj, m_projectile_vector.back());				
-				m_projectile_vector.pop_back();
+				delete_projectile(proj);
 			}
 
-			if (projectile_bounds.findIntersection(first_ai_tank_bounds) && proj_owner_team_id == 1) {
+			for (int j = 0; j < m_ai_tanks.size(); j++) {
+			
+				sf::FloatRect ai_tank_bounds = m_ai_tanks[j].get_tank_bounds();
+				sf::Vector2f ai_tank_position = m_ai_tanks[j].get_position();
+				
+				if (projectile_bounds.findIntersection(ai_tank_bounds) && proj_owner_team_id == 1) {
 
-				m_animation.play(0, sf::Vector2f(first_ai_tank_position.x - m_tank_offset, first_ai_tank_position.y - m_tank_offset), "explosioneffect.png");
-				std::swap(proj, m_projectile_vector.back());
-				m_projectile_vector.pop_back();
-				m_kills_count += 1;
+					m_animation.play(0, sf::Vector2f(ai_tank_position.x - m_tank_offset, ai_tank_position.y - m_tank_offset), "explosioneffect.png");
+					delete_projectile(proj);
+					m_kills_count += 1;
 
-				if (m_kills_count < 5) {
+					if (m_kills_count < 5) {
 
-					if (m_ai_tanks[0].m_tank_attack_type == AiTank::defence) {
-						m_ai_tanks.erase(m_ai_tanks.begin());
-						m_ai_tanks.push_back(AiTank(10, 1, 60.f, 0, AiTank::defence));
-						m_ai_tanks.back().initialize(m_ai_spawn_pos[0], "aitank.png");
+						if (m_ai_tanks[j].m_tank_attack_type == AiTank::defence) {
+							m_ai_tanks.erase(m_ai_tanks.begin() + j);
+							m_ai_tanks.push_back(AiTank("aitank.png", 10, 1, 60.f, 0, AiTank::defence));
+							m_ai_tanks.back().initialize(m_ai_spawn_pos[0]);
+						}
+						else {
+							m_ai_tanks.erase(m_ai_tanks.begin() + j);
+							m_ai_tanks.push_back(AiTank("aitank.png", 10, 1, 60.f, 0, AiTank::attack));
+							int position = rand() % 3;
+							m_ai_tanks.back().initialize(m_ai_spawn_pos[position]);
+						}
 					}
 					else {
-						m_ai_tanks.erase(m_ai_tanks.begin());
-						m_ai_tanks.push_back(AiTank(10, 1, 60.f, 0, AiTank::attack));
-						int position = rand() % 3;
-						m_ai_tanks.back().initialize(m_ai_spawn_pos[position], "aitank.png");
+						m_ai_tanks.erase(m_ai_tanks.begin() + j);
 					}
-				}
-				else {
-					m_ai_tanks.erase(m_ai_tanks.begin());
-				}
-			}
-
-			if (projectile_bounds.findIntersection(second_ai_tank_bounds) && proj_owner_team_id == 1) {
-
-				m_animation.play(0, sf::Vector2f(second_ai_tank_position.x - m_tank_offset, second_ai_tank_position.y - m_tank_offset), "explosioneffect.png");
-				std::swap(proj, m_projectile_vector.back());
-				m_projectile_vector.pop_back();
-				m_kills_count += 1;
-
-				if (m_kills_count < 5) {
-
-					if (m_ai_tanks[1].m_tank_attack_type == AiTank::defence) {
-						m_ai_tanks.erase(m_ai_tanks.end());
-						m_ai_tanks.push_back(AiTank(10, 1, 60.f, 0, AiTank::defence));
-						m_ai_tanks.back().initialize(m_ai_spawn_pos[0], "aitank.png");
-					}
-					else {
-						m_ai_tanks.erase(m_ai_tanks.end());
-						m_ai_tanks.push_back(AiTank(10, 1, 60.f, 0, AiTank::attack));
-						int position = rand() % 3;
-						m_ai_tanks.back().initialize(m_ai_spawn_pos[position], "aitank.png");
-					}
-				}
-				else {
-					m_ai_tanks.erase(m_ai_tanks.end());
-				}
-			}
+				}			
+			}			
 
 			if (projectile_bounds.findIntersection(ai_base_bounds) && proj_owner_team_id == 1) {
 
 				m_animation.play(0, sf::Vector2f(ai_base_position.x - m_base_offset_x, ai_base_position.y - m_base_offset_y), "explosioneffect.png");
-				std::swap(proj, m_projectile_vector.back());
-				m_projectile_vector.pop_back();
+				delete_projectile(proj);
 				
 			}
 			if (projectile_bounds.findIntersection(player_tank_bounds) && proj_owner_team_id == 0) {
 
 				m_animation.play(0, sf::Vector2f(player_tank_position.x - m_tank_offset, player_tank_position.y - m_tank_offset), "explosioneffect.png");
-				std::swap(proj, m_projectile_vector.back());
-				m_projectile_vector.pop_back();
+				delete_projectile(proj);
 
 			}
 			if (projectile_bounds.findIntersection(player_base_bounds) && proj_owner_team_id == 0) {
 
 				m_animation.play(0, sf::Vector2f(player_base_position.x - m_base_offset_x, player_base_position.y - m_base_offset_y), "explosioneffect.png");
-				std::swap(proj, m_projectile_vector.back());
-				m_projectile_vector.pop_back();
-
+				delete_projectile(proj);
 			}						
 		}		
-	}
+	
 
 	m_animation.update(delta);
 }
@@ -385,22 +234,8 @@ void Game::gather_input(input_event events)
 				m_input_state[input_event::keyboard_event::k_S] = true;
 			}
 			if (events.keyboard_events[i].isPressed && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_Space)
-			{
-				Projectile projectile(&m_player_tank);
-
-				if (!m_first_bullet_shot) {
-					m_first_bullet_shot = true;					
-					m_last_projectile_shot = m_total_time;
-					
-					m_projectile_vector.push_back(std::move(projectile));
-				}
-				else {
-					if ((m_total_time - m_last_projectile_shot) >= std::chrono::seconds{ 3 }) {
-
-						m_last_projectile_shot = m_total_time;
-						m_projectile_vector.push_back(std::move(projectile));					
-					}				
-				}				
+			{				
+				projectile_shoot(m_player_tank);			
 			}
 			if (events.keyboard_events[i].isReleased && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_W)
 			{
@@ -438,8 +273,7 @@ int Game::count_inputs(input_array inputs)
 			{
 				continue;
 			}
-			else {
-			
+			else {			
 				++numberOfTrue;
 			}
 		}
@@ -583,24 +417,32 @@ sf::Vector2f Game::get_player_position()
 	return player_position;
 }
 
-void Game::projectile_shoot(int tank_i)
+void Game::projectile_shoot(Tank& tank)
 {
-	//attack enemy
-	Projectile proj_ai(&m_ai_tanks[tank_i]);
+	Projectile projectile(&tank);
 
-	if (!m_first_ai_bullet_shot) {
-		m_first_ai_bullet_shot = true;
-		m_last_ai_projectile_shot = m_total_time;
+	if (!tank.if_first_bullet_shot()) {
+		tank.first_bullet_shot();
+		tank.last_projectile_shot_time(m_total_time);
 
-		m_projectile_vector.push_back(std::move(proj_ai));
+		m_projectile_vector.push_back(std::move(projectile));
 	}
 	else {
-		if ((m_total_time - m_last_ai_projectile_shot) >= std::chrono::seconds{ 3 }) {
 
-			m_last_ai_projectile_shot = m_total_time;
-			m_projectile_vector.push_back(std::move(proj_ai));
+		std::chrono::duration<float> m_last_projectile_shot = tank.when_last_projectile_shot();
+
+		if ((m_total_time - m_last_projectile_shot) >= std::chrono::seconds{ 3 }) {
+
+			tank.last_projectile_shot_time(m_total_time);
+			m_projectile_vector.push_back(std::move(projectile));
 		}
-	}	
+	}
+}
+
+void Game::delete_projectile(Projectile& proj)
+{
+	std::swap(proj, m_projectile_vector.back());
+	m_projectile_vector.pop_back();
 }
 
 sf::Vector2f Game::separating_axis(const Tank& ai_tank, const Tank& player_tank, sf::Vector2f player_pos) {
@@ -632,7 +474,6 @@ sf::Vector2f Game::separating_axis(const Tank& ai_tank, const Tank& player_tank,
 		if (overlap < 0) {
 
 			mtd = player_dir * overlap;
-
 		}
 	}
 

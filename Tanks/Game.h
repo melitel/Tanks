@@ -59,7 +59,8 @@ public:
 	sf::Vector2f get_base_position();
 	sf::Vector2f get_ai_base_position();
 	sf::Vector2f get_player_position();
-	void projectile_shoot(int tank_i);
+	void projectile_shoot(Tank& tank);
+	void delete_projectile(Projectile& proj);
 	sf::Vector2f separating_axis(const Tank& ai_tank, const Tank& player_tank, sf::Vector2f player_pos);
 
 	~Game();
@@ -68,16 +69,14 @@ public:
 		gs_game_start
 	};
 	game_state m_game_state;
+	using input_array = std::array<bool, input_event::keyboard_event::key::k_size>;
+	input_array m_input_state;
+	int count_inputs(input_array inputs);
 
 private:
 
-
 	uint32_t m_game_win_width;
 	uint32_t m_game_win_height;
-
-	using input_array = std::array<bool, input_event::keyboard_event::key::k_size>;
-
-	input_array m_input_state;
 
 	Animation m_animation;
 
@@ -89,13 +88,12 @@ private:
 	std::vector <sf::Vector2f> m_ai_spawn_pos{sf::Vector2f((13*32) + 16, (1*32) + 16), 
 		sf::Vector2f((2 * 32) + 16, (7 * 32) + 16), 
 		sf::Vector2f((20 * 32) + 16, (12 * 32) + 16) };
-	float m_projectile_distance = 64;
+//	float m_projectile_distance = 64;
 	
 	float m_tank_offset = 16;
 	float m_base_offset_x = 24;
 	float m_base_offset_y = 28;
 	
-	int count_inputs(input_array inputs);
 	int m_kills_count = 0;	
 	sf::Texture m_background_tex;
 	sf::Texture m_start_button_tex;
@@ -108,9 +106,9 @@ private:
 	std::chrono::time_point<std::chrono::system_clock> start_animation_time = std::chrono::system_clock::now();
 	std::chrono::duration<float> m_total_time{ 0 };
 	std::chrono::duration<float> m_dt{ 0 };
-	bool m_first_bullet_shot = false;
+	//bool m_first_bullet_shot = false;
 	bool m_first_ai_bullet_shot = false;
-	std::chrono::duration<float> m_last_projectile_shot{0};
+	//std::chrono::duration<float> m_last_projectile_shot{0};
 	std::chrono::duration<float> m_last_ai_projectile_shot{ 0 };
 	
 
