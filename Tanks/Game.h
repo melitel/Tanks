@@ -56,6 +56,8 @@ public:
 	void draw(std::unique_ptr<sf::RenderWindow>& window);
 	void gather_input(input_event events);
 	void calibrate_pos(sf::Vector2f& tank_position);
+	void calibrate_position_moving_north_or_west(float& tank_position_axis, sf::Vector2i corner_1, sf::Vector2i corner_2, int corner_calibrate_axis);
+	void calibrate_position_moving_south_or_east(float& tank_position_axis, sf::Vector2i corner_1, sf::Vector2i corner_2, int corner_calibrate_axis);
 	sf::Vector2f get_base_position();
 	sf::Vector2f get_ai_base_position();
 	sf::Vector2f get_player_position();

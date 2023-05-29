@@ -33,6 +33,8 @@ private:
     void move_controller(float delta, int tank_i);
     void processing_state(sf::Vector2i ai_tank_tile, sf::Vector2i player_tank_tile, sf::Vector2i player_base_tile, int tank_i);
     void change_state(sf::Vector2i ai_tank_tile, sf::Vector2i player_tank_tile, sf::Vector2i player_base_tile, sf::Vector2i ai_base_tile);
+    void process_moving_to_base(sf::Vector2i ai_tank_tile, sf::Vector2i player_base_tile, int tank_i);
+    void process_chasing_enemy_tank(sf::Vector2i ai_tank_tile, sf::Vector2i player_tank_tile, int tank_i);
     BrainAtk m_ai_brain;
     std::vector<BrainAtk::Node> m_path;
     ai_status m_ai_status;  
