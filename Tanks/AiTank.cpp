@@ -113,7 +113,7 @@ void AiTank::move_controller(float delta, int tank_i)
 	sf::Vector2f p1 = p0 + delta * vel;
 	m_direction = m_velocity;
 
-	sf::Vector2f mtd = g_Game->separating_axis(g_Game->m_player_tank, g_Game->m_ai_tanks[tank_i], p1);
+	sf::Vector2f mtd = g_Game->separating_axis(g_Game->get_player_tank(), g_Game->m_ai_tanks[tank_i], p1);
 
 	if (g_Game->m_ai_tanks.size() > 1) {
 

@@ -13,6 +13,7 @@
 #include <array>
 #include <algorithm>
 #include <cmath>
+#include "Command.h"
 
 class Game
 {
@@ -20,8 +21,7 @@ class Game
 public:
 
 	std::unique_ptr<TileMap> m_map;
-	std::vector <AiTank> m_ai_tanks;
-	ControllableTank m_player_tank;
+	std::vector <AiTank> m_ai_tanks;	
 	uint32_t m_level_rows = 19;
 	uint32_t m_level_columns = 27;
 
@@ -64,6 +64,7 @@ public:
 	void projectile_shoot(Tank& tank);
 	void delete_projectile(Projectile& proj);
 	sf::Vector2f separating_axis(const Tank& ai_tank, const Tank& player_tank, sf::Vector2f player_pos);
+	ControllableTank& get_player_tank() { return m_player_tank; }
 
 	~Game();
 	enum game_state {
@@ -76,14 +77,19 @@ public:
 	int count_inputs(input_array inputs);
 
 private:
+	
+	std::vector <Command*> m_commands;
+	ControllableTank m_player_tank;
 
 	uint32_t m_game_win_width;
 	uint32_t m_game_win_height;
 
 	Animation m_animation;
 
-	Base m_player_base{ 50, 10, 1 };
-	Base m_ai_base{50, 10, 0};
+	//Base m_player_base{ 50, 10, 1 };
+	//Base m_ai_base{50, 10, 0};
+	Base m_player_base{ 1 };
+	Base m_ai_base{ 0 };
 
 	std::vector <Projectile> m_projectile_vector;
 	

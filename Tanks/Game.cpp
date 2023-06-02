@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "FireCommand.h"
 
 Game* g_Game = nullptr;
 
@@ -72,6 +73,13 @@ void Game::update()
 			}
 		}
 	}
+
+	for (int j = 0; j < m_commands.size(); ++j) {
+	
+		m_commands[j]->execute();
+	}
+
+	m_commands.clear();
 
 	for (int i = 0; i < m_projectile_vector.size(); i++)
 	{
@@ -227,7 +235,9 @@ void Game::gather_input(input_event events)
 			}
 			if (events.keyboard_events[i].isPressed && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_Space)
 			{				
-				projectile_shoot(m_player_tank);			
+				Command* command;
+				command = new FireCommand;
+				m_commands.push_back(command);						
 			}
 			if (events.keyboard_events[i].isReleased && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_W)
 			{

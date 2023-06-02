@@ -175,7 +175,7 @@ void ControllableTank::move_tank(movement_direction direction, float delta)
 	if (!g_Game->m_ai_tanks.empty()) {
 
 		for (int i = 0; i < g_Game->m_ai_tanks.size(); ++i) {
-			mtd = g_Game->separating_axis(g_Game->m_ai_tanks[i], g_Game->m_player_tank, p1);
+			mtd = g_Game->separating_axis(g_Game->m_ai_tanks[i], g_Game->get_player_tank(), p1);
 			p1 = p1 + mtd;
 			g_Game->calibrate_pos(p1);
 			m_tank.setPosition(p1);
