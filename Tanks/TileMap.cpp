@@ -3,6 +3,7 @@
 #include "WaterTile.h"
 #include "BushTile.h"
 #include "BrickTile.h"
+#include "HeaderTile.h"
 
 
 bool TileMap::load(const std::string& tileset)
@@ -73,11 +74,11 @@ void TileMap::read_level_from_file(const std::string filename)
 	std::ifstream in_file;
 	in_file.open(filename);
 
-	m_tiles_map.resize(19);
+	m_tiles_map.resize(20);
 
 	if (in_file.is_open()) {
 
-		for (int rows = 0; rows != 19; rows++)
+		for (int rows = 0; rows != 20; rows++)
 		{
 			m_tiles_map[rows].resize(27);
 
@@ -101,6 +102,10 @@ void TileMap::read_level_from_file(const std::string filename)
 					else if (tile_id == 3)
 					{
 						m_tiles_map[rows][cols] = std::make_unique<BrickTile>();
+					}
+					else if (tile_id == 4)
+					{
+						m_tiles_map[rows][cols] = std::make_unique<HeaderTile>();
 					}
 				}			
 		}

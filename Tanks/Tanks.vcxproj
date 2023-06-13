@@ -92,7 +92,9 @@ XCOPY $(SolutionDir)textures\ $(OutDir) /i /c /k /y /d</Command>
   <ItemGroup>
     <ClCompile Include="AiTank.cpp" />
     <ClCompile Include="Animation.cpp" />
+    <ClCompile Include="AnimationObserver.cpp" />
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="AudioObserver.cpp" />
     <ClCompile Include="Base.cpp" />
     <ClCompile Include="BrainAtk.cpp" />
     <ClCompile Include="BrickTile.cpp" />
@@ -102,6 +104,9 @@ XCOPY $(SolutionDir)textures\ $(OutDir) /i /c /k /y /d</Command>
     <ClCompile Include="FireCommand.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GrassTile.cpp" />
+    <ClCompile Include="HeaderTile.cpp" />
+    <ClCompile Include="KillCountObserver.cpp" />
+    <ClCompile Include="Observer.cpp" />
     <ClCompile Include="Projectile.cpp" />
     <ClCompile Include="Tank.cpp" />
     <ClCompile Include="Tanks.cpp" />
@@ -113,7 +118,9 @@ XCOPY $(SolutionDir)textures\ $(OutDir) /i /c /k /y /d</Command>
   <ItemGroup>
     <ClInclude Include="AiTank.h" />
     <ClInclude Include="Animation.h" />
+    <ClInclude Include="AnimationObserver.h" />
     <ClInclude Include="Application.h" />
+    <ClInclude Include="AudioObserver.h" />
     <ClInclude Include="Base.h" />
     <ClInclude Include="BrainAtk.h" />
     <ClInclude Include="BrickTile.h" />
@@ -123,6 +130,9 @@ XCOPY $(SolutionDir)textures\ $(OutDir) /i /c /k /y /d</Command>
     <ClInclude Include="FireCommand.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GrassTile.h" />
+    <ClInclude Include="HeaderTile.h" />
+    <ClInclude Include="KillCountObserver.h" />
+    <ClInclude Include="Observer.h" />
     <ClInclude Include="Projectile.h" />
     <ClInclude Include="Tank.h" />
     <ClInclude Include="TextureManager.h" />

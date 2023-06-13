@@ -24,7 +24,7 @@ public:
 private:
 	
 	unsigned int m_width = 27;
-	unsigned int m_height = 19;
+	unsigned int m_height = 20;
 	sf::Vector2u m_tile_size = sf::Vector2u(32, 32);
 	std::vector <std::vector<std::shared_ptr<Tile>>> m_tiles_map;
 	virtual void draw(sf::RenderTarget& target, const sf::RenderStates& states) const override;

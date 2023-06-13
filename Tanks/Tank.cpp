@@ -3,7 +3,7 @@
 
 extern Game* g_Game;
 
-std::unordered_map<std::string, sf::Texture> TextureManager::m_textures;
+std::unordered_map<std::string, sf::Texture*> TextureManager::m_textures;
 
 void Tank::update(float dt, int tank_i)
 {
@@ -24,6 +24,28 @@ void Tank::initialize(const sf::Vector2f& pos)
 
 void Tank::move_tank(movement_direction direction, float delta) {
 
+}
+
+void Tank::hitByBullet()
+{
+	kill_count();
+
+	// Notify all observers
+	for (Observer* observer : observers) {
+		observer->onTankHit(this);
+	}
+}
+
+void Tank::addObserver(Observer* observer)
+{
+	// Add to vector
+	observers.push_back(observer);
+}
+
+void Tank::removeObserver(Observer* observer)
+{
+	// Remove from vector
+	observers.pop_back();
 }
 
 void Tank::rotate_tank(sf::Angle angle)
@@ -71,6 +93,16 @@ const sf::RectangleShape Tank::get_shape() const
 const uint32_t Tank::get_team_id() const
 {
 	return m_team_id;
+}
+
+void Tank::kill_count()
+{
+	m_kills_count += 1;
+}
+
+const uint32_t Tank::get_kill_count() const
+{
+	return m_kills_count;
 }
 
 bool Tank::if_first_bullet_shot()
@@ -136,3 +168,5 @@ Tank::Tank(Tank&& other) noexcept
 	std::swap(m_tank_attack_type, other.m_tank_attack_type);
 	std::swap(m_tankTexture, other.m_tankTexture);
 }
+
+

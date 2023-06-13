@@ -11,6 +11,7 @@ void ControllableTank::initialize(const sf::Vector2f& pos)
 {
 	Tank::initialize(pos);
 	m_first_bullet_shot = false;
+	m_kills_count = 0;
 }
 
 void ControllableTank::update(float dt, int tank_i)

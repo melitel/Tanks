@@ -14,6 +14,9 @@
 #include <algorithm>
 #include <cmath>
 #include "Command.h"
+#include "KillCountObserver.h"
+#include "AnimationObserver.h"
+#include "AudioObserver.h"
 
 class Game
 {
@@ -21,8 +24,9 @@ class Game
 public:
 
 	std::unique_ptr<TileMap> m_map;
-	std::vector <AiTank> m_ai_tanks;	
-	uint32_t m_level_rows = 19;
+	std::vector <AiTank> m_ai_tanks;
+	Animation m_animation;
+	uint32_t m_level_rows = 20;
 	uint32_t m_level_columns = 27;
 
 	struct input_event {
@@ -77,14 +81,18 @@ public:
 	int count_inputs(input_array inputs);
 
 private:
-	
-	std::vector <Command*> m_commands;
-	ControllableTank m_player_tank;
 
+	KillCountObserver killCountObserver;
+	AudioObserver audioObserver;
+	AnimationObserver animationObserver;
+		
 	uint32_t m_game_win_width;
 	uint32_t m_game_win_height;
 
-	Animation m_animation;
+	std::vector <Command*> m_commands;
+	ControllableTank m_player_tank;
+
+	
 
 	//Base m_player_base{ 50, 10, 1 };
 	//Base m_ai_base{50, 10, 0};
@@ -93,21 +101,28 @@ private:
 
 	std::vector <Projectile> m_projectile_vector;
 	
-	std::vector <sf::Vector2f> m_ai_spawn_pos{sf::Vector2f((13*32) + 16, (1*32) + 16), 
-		sf::Vector2f((2 * 32) + 16, (7 * 32) + 16), 
-		sf::Vector2f((20 * 32) + 16, (12 * 32) + 16) };
+	std::vector <sf::Vector2f> m_ai_spawn_pos{sf::Vector2f((13*32) + 16, (2*32) + 16), 
+		sf::Vector2f((2 * 32) + 16, (8 * 32) + 16), 
+		sf::Vector2f((20 * 32) + 16, (13 * 32) + 16) };
 //	float m_projectile_distance = 64;
 	
 	float m_tank_offset = 16;
 	float m_base_offset_x = 24;
-	float m_base_offset_y = 28;
+	float m_base_offset_y = 28;	
 	
-	int m_kills_count = 0;	
 	sf::Texture m_background_tex;
 	sf::Texture m_start_button_tex;
 	sf::RectangleShape m_menu_background;
 	sf::RectangleShape m_game_background;
 	sf::RectangleShape m_start_button;
+	sf::RectangleShape m_life;
+	sf::Texture m_life_texture;
+	sf::Text m_life_text;
+	sf::RectangleShape m_kill_count_icon;
+	sf::Texture m_kill_count_texture;
+	sf::Text m_kill_count_text;
+	sf::Font m_game_font;
+
 
 	std::chrono::time_point<std::chrono::system_clock> m_time{ std::chrono::system_clock::now() };
 	std::chrono::time_point<std::chrono::system_clock> m_start_time{ std::chrono::system_clock::now() };

@@ -12,15 +12,15 @@ public:
 
         if (it != m_textures.end()) {
             // Texture already loaded, return it
-            return it->second;
+            return *it->second;
         }
 
         // Texture not found, load it
-        sf::Texture texture;
-        if (texture.loadFromFile(filename)) {
+        sf::Texture* texture = new sf::Texture();
+        if (texture->loadFromFile(filename)) {
             // Successfully loaded, add it to the cache
             m_textures[filename] = texture;
-            return m_textures[filename];
+            return *texture;
         }
 
         // Failed to load texture, return a default texture or handle the error
@@ -31,7 +31,7 @@ public:
 
 private:
 
-    static std::unordered_map<std::string, sf::Texture> m_textures;
+    static std::unordered_map<std::string, sf::Texture*> m_textures;
 
 };
 

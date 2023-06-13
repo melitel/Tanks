@@ -1,18 +1,29 @@
 #include "Game.h"
 #include "FireCommand.h"
+#include <sstream>
 
 Game* g_Game = nullptr;
 
 void Game::initialize(uint32_t window_width, uint32_t window_height, std::unique_ptr<sf::RenderWindow> &window)
-{
-	m_input_state.fill(false);
-	m_kills_count = 0;
+{	
+	m_input_state.fill(false);	
+
+	if (!m_game_font.loadFromFile("arial.ttf"))
+	{
+		//error::
+	}
+
+	// Attach observers to the tank
+	//m_player_tank.addObserver(&killCountObserver);
+	m_player_tank.addObserver(&audioObserver);
+	m_player_tank.addObserver(&animationObserver);
 
 	m_ai_tanks.push_back(AiTank("aitank.png", 10, 1, 60.f, 0, AiTank::attack));
 	m_ai_tanks.push_back(AiTank("aitank.png", 10, 1, 60.f, 0, AiTank::defence));
 	
 	m_game_win_width = window_width;
-	m_game_win_height = window_height;
+	m_game_win_height = window_height;		
+
 	m_map = std::make_unique<TileMap>();
 	m_game_state = gs_menu;
 
@@ -27,6 +38,34 @@ void Game::initialize(uint32_t window_width, uint32_t window_height, std::unique
 	m_game_background.setSize(sf::Vector2f((float)m_game_win_width, (float)m_game_win_height));
 	m_game_background.setPosition(sf::Vector2f(0.f, 0.f));
 	m_game_background.setFillColor(sf::Color::Yellow);
+	
+	m_life.setSize(sf::Vector2f(32.f, 32.f));
+	m_life.setPosition(sf::Vector2f(32.f, 0.f));
+	if (!m_life_texture.loadFromFile("heart.png"))
+	{
+		std::cout << "Error";
+	}
+	m_life.setTexture(&m_life_texture);
+
+	m_life_text.setCharacterSize(25);
+	m_life_text.setFillColor(sf::Color::White);
+	m_life_text.setPosition(sf::Vector2f(70.f, 0.f));
+	m_life_text.setString("0");
+	m_life_text.setFont(m_game_font);
+
+	m_kill_count_icon.setSize(sf::Vector2f(32.f, 32.f));
+	m_kill_count_icon.setPosition(sf::Vector2f(760.f, 0.f));
+	if (!m_kill_count_texture.loadFromFile("killcount.png"))
+	{
+		std::cout << "Error";
+	}
+	m_kill_count_icon.setTexture(&m_kill_count_texture);
+
+	m_kill_count_text.setCharacterSize(25);
+	m_kill_count_text.setFillColor(sf::Color::White);
+	m_kill_count_text.setPosition(sf::Vector2f(800.f, 0.f));
+	m_kill_count_text.setString("0");
+	m_kill_count_text.setFont(m_game_font);
 
 	m_start_button.setSize(sf::Vector2f(225.f, 90.f));
 	m_start_button.setPosition(sf::Vector2f(310.f, 200.f));
@@ -43,13 +82,13 @@ void Game::initialize(uint32_t window_width, uint32_t window_height, std::unique
 		std::cout << "Error";
 	}
 
-	m_player_tank.initialize(sf::Vector2f(432.f, 560.f));
+	m_player_tank.initialize(sf::Vector2f(432.f, 592.f));
 
 	for (int i = 0; i < m_ai_tanks.size(); ++i) {		
 		m_ai_tanks[i].initialize(m_ai_spawn_pos[0]);
 	}
-	m_player_base.initialize(sf::Vector2f(432.f, 560.f), "base.png");
-	m_ai_base.initialize(sf::Vector2f(432.f, 48.f), "base.png");
+	m_player_base.initialize(sf::Vector2f(432.f, 592.f), "base.png");
+	m_ai_base.initialize(sf::Vector2f(432.f, 80.f), "base.png");
 	m_player_base.rotate_base(sf::degrees(180.f));	
 	
 	g_Game = this;
@@ -115,15 +154,23 @@ void Game::update()
 		for (int j = 0; j < m_ai_tanks.size(); j++) {
 
 			sf::FloatRect ai_tank_bounds = m_ai_tanks[j].get_tank_bounds();
-			sf::Vector2f ai_tank_position = m_ai_tanks[j].get_position();
+			sf::Vector2f ai_tank_position = m_ai_tanks[j].get_position();			
 
 			if (projectile_bounds.findIntersection(ai_tank_bounds) && proj_owner_team_id == 1) {
 
 				m_animation.play(0, sf::Vector2f(ai_tank_position.x - m_tank_offset, ai_tank_position.y - m_tank_offset), "explosioneffect.png");
 				delete_projectile(proj);
-				m_kills_count += 1;
+				m_player_tank.kill_count();
 
-				if (m_kills_count < 5) {
+				uint32_t kills_count = m_player_tank.get_kill_count();
+				// Convert integer to string
+				std::stringstream ss;
+				ss << kills_count;
+				std::string killCountString = ss.str();
+								
+				m_kill_count_text.setString(killCountString);
+
+				if (kills_count < 5) {
 
 					if (m_ai_tanks[j].m_tank_attack_type == AiTank::defence) {
 						m_ai_tanks.erase(m_ai_tanks.begin() + j);
@@ -148,7 +195,8 @@ void Game::update()
 			delete_projectile(proj);
 		}
 		if (projectile_bounds.findIntersection(player_tank_bounds) && proj_owner_team_id == 0) {
-			m_animation.play(0, sf::Vector2f(player_tank_position.x - m_tank_offset, player_tank_position.y - m_tank_offset), "explosioneffect.png");
+			m_player_tank.hitByBullet();
+			//m_animation.play(0, sf::Vector2f(player_tank_position.x - m_tank_offset, player_tank_position.y - m_tank_offset), "explosioneffect.png");
 			delete_projectile(proj);
 		}
 		if (projectile_bounds.findIntersection(player_base_bounds) && proj_owner_team_id == 0) {
@@ -170,8 +218,12 @@ void Game::draw(std::unique_ptr<sf::RenderWindow>& window)
 		window->draw(m_start_button);
 	}
 	if (m_game_state == game_state::gs_game_start)
-	{			
-		window->draw(*m_map);		
+	{	
+		window->draw(*m_map);
+		window->draw(m_life);
+		window->draw(m_kill_count_icon);
+		window->draw(m_kill_count_text);
+		window->draw(m_life_text);
 		m_player_base.draw(window);
 		m_ai_base.draw(window);
 		m_player_tank.draw(window);

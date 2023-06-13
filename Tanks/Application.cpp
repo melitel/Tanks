@@ -6,7 +6,7 @@ std::unique_ptr<Game> Application::m_game = nullptr;
 std::unique_ptr<sf::RenderWindow> Application::m_window = nullptr;
 
 const uint32_t Application::m_window_width = 864;
-const uint32_t Application::m_window_height = 608;
+const uint32_t Application::m_window_height = 640;
 
 void Application::run()
 {
