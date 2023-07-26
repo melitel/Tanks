@@ -12,12 +12,13 @@ public:
 
 private:
 
-	static std::unique_ptr<Game> m_game;
+	static std::unique_ptr<Game> m_game;	
 
 	static std::unique_ptr<sf::RenderWindow> m_window;
 
 	static const uint32_t m_window_width;
 	static const uint32_t m_window_height;
+	
 
 };
 

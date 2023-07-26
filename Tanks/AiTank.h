@@ -7,8 +7,8 @@ class AiTank :
 {
 public:
 
-    AiTank(const std::string& textureFilename, unsigned int health, unsigned int damage, float move_speed, uint32_t team_id, attack_type tank_attack_type)
-        : Tank(textureFilename, health, damage, move_speed, team_id, tank_attack_type) {}
+    AiTank(const std::string& textureFilename, unsigned int life, unsigned int health, unsigned int damage, float move_speed, uint32_t team_id, attack_type tank_attack_type)
+        : Tank(textureFilename, life, health, damage, move_speed, team_id, tank_attack_type) {}
 
     enum ai_status {
         patrolling,

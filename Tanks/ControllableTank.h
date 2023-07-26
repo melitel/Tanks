@@ -6,7 +6,7 @@ class ControllableTank : public Tank
 public:
 
 	ControllableTank() :
-		Tank("commontankup.png", 10, 1, 50.f, 1, attack) {}
+		Tank("commontankup.png", 3, 10, 1, 90.f, 1, attack) {}
 
 	void initialize(const sf::Vector2f& pos) override;
 	void update(float dt, int tank_i) override;

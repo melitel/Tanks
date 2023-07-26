@@ -14,6 +14,7 @@ public:
 	bool load(const std::string& tileset);
 	void read_level_from_file(const std::string filename);
 	bool get_tile_walkable_by_coordinates(int x, int y);
+	bool get_tile_pierceable_by_coordinates(int x, int y);
 	sf::Vector2i get_tile_coordinates(int x, int y);
 	bool get_tile_walkable_by_indices(int x, int y);
 	bool get_tile_view_through_by_indices(int x, int y);

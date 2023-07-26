@@ -7,6 +7,9 @@
 #include "Projectile.h"
 #include "Animation.h"
 #include "Base.h"
+#include "BoostSprite.h"
+#include "SpeedBoostPowerUp.h"
+#include "LifeBoostPowerUp.h"
 #include <memory>
 #include <iostream>
 #include <fstream>
@@ -17,6 +20,7 @@
 #include "KillCountObserver.h"
 #include "AnimationObserver.h"
 #include "AudioObserver.h"
+#include "InputEventQueue.h"
 
 class Game
 {
@@ -25,9 +29,10 @@ public:
 
 	std::unique_ptr<TileMap> m_map;
 	std::vector <AiTank> m_ai_tanks;
+	std::vector <BoostSprite> m_boosts;
 	Animation m_animation;
 	uint32_t m_level_rows = 20;
-	uint32_t m_level_columns = 27;
+	uint32_t m_level_columns = 27;	
 
 	struct input_event {
 
@@ -55,20 +60,25 @@ public:
 
 	input_event events;
 
-	void initialize(uint32_t window_width, uint32_t window_height, std::unique_ptr<sf::RenderWindow>& window);
-	void update();
-	void draw(std::unique_ptr<sf::RenderWindow>& window);
-	void gather_input(input_event events);
-	void calibrate_pos(sf::Vector2f& tank_position);
-	void calibrate_position_moving_north_or_west(float& tank_position_axis, sf::Vector2i corner_1, sf::Vector2i corner_2, int corner_calibrate_axis);
-	void calibrate_position_moving_south_or_east(float& tank_position_axis, sf::Vector2i corner_1, sf::Vector2i corner_2, int corner_calibrate_axis);
 	sf::Vector2f get_base_position();
 	sf::Vector2f get_ai_base_position();
 	sf::Vector2f get_player_position();
+	ControllableTank& get_player_tank() { return m_player_tank; }
+	sf::Vector2f separating_axis(const Tank& ai_tank, const Tank& player_tank, sf::Vector2f player_pos);
+	
+	void initialize(uint32_t window_width, uint32_t window_height, std::unique_ptr<sf::RenderWindow>& window);
+	void update();
+	void draw(std::unique_ptr<sf::RenderWindow>& window);
+	//void gather_input(input_event events);
+	void process_input();
+	void calibrate_pos(sf::Vector2f& tank_position);
+	void calibrate_position_moving_north_or_west(float& tank_position_axis, sf::Vector2i corner_1, sf::Vector2i corner_2, int corner_calibrate_axis);
+	void calibrate_position_moving_south_or_east(float& tank_position_axis, sf::Vector2i corner_1, sf::Vector2i corner_2, int corner_calibrate_axis);
+	void calibrate_projectile(Projectile& proj);
 	void projectile_shoot(Tank& tank);
 	void delete_projectile(Projectile& proj);
-	sf::Vector2f separating_axis(const Tank& ai_tank, const Tank& player_tank, sf::Vector2f player_pos);
-	ControllableTank& get_player_tank() { return m_player_tank; }
+	void push_input_event(InputEvent &event);
+	void input_event(int buttonType, bool buttonPressed, sf::Vector2i pos, InputEvent& event, InputEvent::Type eventType);
 
 	~Game();
 	enum game_state {
@@ -79,20 +89,22 @@ public:
 	using input_array = std::array<bool, input_event::keyboard_event::key::k_size>;
 	input_array m_input_state;
 	int count_inputs(input_array inputs);
+	game_state getGameState() const {
+		return m_game_state;
+	}
 
 private:
 
 	KillCountObserver killCountObserver;
 	AudioObserver audioObserver;
 	AnimationObserver animationObserver;
+	InputEventQueue m_event_queue;
 		
 	uint32_t m_game_win_width;
 	uint32_t m_game_win_height;
 
 	std::vector <Command*> m_commands;
-	ControllableTank m_player_tank;
-
-	
+	ControllableTank m_player_tank;	
 
 	//Base m_player_base{ 50, 10, 1 };
 	//Base m_ai_base{50, 10, 0};
@@ -115,7 +127,7 @@ private:
 	sf::RectangleShape m_menu_background;
 	sf::RectangleShape m_game_background;
 	sf::RectangleShape m_start_button;
-	sf::RectangleShape m_life;
+	sf::RectangleShape m_player_life;
 	sf::Texture m_life_texture;
 	sf::Text m_life_text;
 	sf::RectangleShape m_kill_count_icon;
@@ -129,11 +141,13 @@ private:
 	std::chrono::time_point<std::chrono::system_clock> start_animation_time = std::chrono::system_clock::now();
 	std::chrono::duration<float> m_total_time{ 0 };
 	std::chrono::duration<float> m_dt{ 0 };
+	std::chrono::duration<float> m_boost_spawn_time{ 0 };
 	//bool m_first_bullet_shot = false;
 	bool m_first_ai_bullet_shot = false;
 	//std::chrono::duration<float> m_last_projectile_shot{0};
 	std::chrono::duration<float> m_last_ai_projectile_shot{ 0 };
 	
+	sf::Vector2f random_spawn_point();
 
 };
 

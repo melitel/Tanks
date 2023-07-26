@@ -10,11 +10,13 @@ void AiTank::initialize(const sf::Vector2f& pos)
 	m_goal_def_switch = 1;
 	m_first_ai_bullet_shot = false;
 
-	if (m_tank_attack_type == attack) {
+	switch (m_tank_attack_type) {
+	case attack:
 		m_ai_status = moving_to_enemy_base;
-	}
-	if (m_tank_attack_type == defence) {
+		break;
+	case defence:
 		m_ai_status = defending_base;
+		break;
 	}
 }
 
@@ -80,7 +82,6 @@ void AiTank::move_controller(float delta, int tank_i)
 				}
 			}
 			else {
-
 				m_velocity = sf::Vector2f(0.f, 0.f);
 			}
 		}
@@ -139,23 +140,24 @@ void AiTank::processing_state(sf::Vector2i ai_tank_tile, sf::Vector2i player_tan
 	sf::Vector2i ai_base_tile = sf::Vector2i(int(ai_base_pos.x / 32), int(ai_base_pos.y / 32));
 	sf::Vector2f player_tank_pos = g_Game->get_player_position();
 
-	if (m_ai_status == moving_to_enemy_base) {
-		process_moving_to_base(ai_tank_tile, player_base_tile, tank_i);
-	}
-	else if (m_ai_status == chasing_enemy_tank) {
-		process_chasing_enemy_tank(ai_tank_tile, player_tank_tile, tank_i);		
-	}
-	else if (m_ai_status == defending_base) {
+	switch (m_ai_status) {
 
+	case moving_to_enemy_base:
+		process_moving_to_base(ai_tank_tile, player_base_tile, tank_i);
+		break;
+	case chasing_enemy_tank:
+		process_chasing_enemy_tank(ai_tank_tile, player_tank_tile, tank_i);
+		break;
+	case defending_base:
 		if (m_goal_def_switch == 1) {
 			get_path(ai_tank_tile.x, ai_tank_tile.y, 0, ai_base_tile.y + 2, tank_i);
 		}
-		if (m_goal_def_switch == 2) {
+		else if (m_goal_def_switch == 2) {
 			get_path(ai_tank_tile.x, ai_tank_tile.y, (g_Game->m_level_columns - 1), ai_base_tile.y + 2, tank_i);
 		}
+		break;	
 	}
 }
-
 
 void AiTank::change_state(sf::Vector2i ai_tank_tile, sf::Vector2i player_tank_tile, sf::Vector2i player_base_tile, sf::Vector2i ai_base_tile)
 {

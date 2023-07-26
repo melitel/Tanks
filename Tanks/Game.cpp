@@ -3,23 +3,28 @@
 #include <sstream>
 
 Game* g_Game = nullptr;
+PowerUp* m_life_boost = new LifeBoostPowerUp();
+PowerUp* m_speed_boost = new SpeedBoostPowerUp();
 
 void Game::initialize(uint32_t window_width, uint32_t window_height, std::unique_ptr<sf::RenderWindow> &window)
 {	
-	m_input_state.fill(false);	
+	m_input_state.fill(false);
+	m_boosts.clear();
 
 	if (!m_game_font.loadFromFile("arial.ttf"))
 	{
 		//error::
 	}
 
+	m_player_tank.initialize(sf::Vector2f(432.f, 592.f));
+
 	// Attach observers to the tank
 	//m_player_tank.addObserver(&killCountObserver);
 	m_player_tank.addObserver(&audioObserver);
 	m_player_tank.addObserver(&animationObserver);
 
-	m_ai_tanks.push_back(AiTank("aitank.png", 10, 1, 60.f, 0, AiTank::attack));
-	m_ai_tanks.push_back(AiTank("aitank.png", 10, 1, 60.f, 0, AiTank::defence));
+	m_ai_tanks.push_back(AiTank("aitank.png", 1, 10, 1, 60.f, 0, AiTank::attack));
+	m_ai_tanks.push_back(AiTank("aitank.png", 1, 10, 1, 60.f, 0, AiTank::defence));
 	
 	m_game_win_width = window_width;
 	m_game_win_height = window_height;		
@@ -39,18 +44,25 @@ void Game::initialize(uint32_t window_width, uint32_t window_height, std::unique
 	m_game_background.setPosition(sf::Vector2f(0.f, 0.f));
 	m_game_background.setFillColor(sf::Color::Yellow);
 	
-	m_life.setSize(sf::Vector2f(32.f, 32.f));
-	m_life.setPosition(sf::Vector2f(32.f, 0.f));
+	m_player_life.setSize(sf::Vector2f(32.f, 32.f));
+	m_player_life.setPosition(sf::Vector2f(32.f, 0.f));
 	if (!m_life_texture.loadFromFile("heart.png"))
 	{
 		std::cout << "Error";
 	}
-	m_life.setTexture(&m_life_texture);
+	m_player_life.setTexture(&m_life_texture);
 
 	m_life_text.setCharacterSize(25);
 	m_life_text.setFillColor(sf::Color::White);
 	m_life_text.setPosition(sf::Vector2f(70.f, 0.f));
-	m_life_text.setString("0");
+
+	uint32_t player_life_count = m_player_tank.get_life();
+	// Convert integer to string
+	std::stringstream pl;
+	pl << player_life_count;
+	std::string playerLifeCountString = pl.str();
+
+	m_life_text.setString(playerLifeCountString);
 	m_life_text.setFont(m_game_font);
 
 	m_kill_count_icon.setSize(sf::Vector2f(32.f, 32.f));
@@ -82,8 +94,6 @@ void Game::initialize(uint32_t window_width, uint32_t window_height, std::unique
 		std::cout << "Error";
 	}
 
-	m_player_tank.initialize(sf::Vector2f(432.f, 592.f));
-
 	for (int i = 0; i < m_ai_tanks.size(); ++i) {		
 		m_ai_tanks[i].initialize(m_ai_spawn_pos[0]);
 	}
@@ -100,15 +110,64 @@ void Game::update()
 	m_dt = t - m_time;
 	m_time = t;
 	m_total_time = t - m_start_time;
-	float delta = std::min(m_dt.count(), 1.f / 30.f);
+	float delta = std::min(m_dt.count(), 1.f / 30.f);	
+	int total_time_seconds = std::chrono::duration_cast<std::chrono::seconds>(m_total_time).count();
+
+	sf::FloatRect ai_base_bounds = m_ai_base.get_bounds();
+	sf::Vector2f ai_base_position = m_ai_base.get_position();
+
+	sf::FloatRect player_tank_bounds = m_player_tank.get_tank_bounds();
+	sf::Vector2f player_tank_position = m_player_tank.get_position();
+
+	sf::FloatRect player_base_bounds = m_player_base.get_bounds();
+	sf::Vector2f player_base_position = m_player_base.get_position();
 
 	if (m_game_state == game_state::gs_game_start) {
 
-		m_player_tank.update(delta, 0);
+		m_player_tank.update(delta, 0);		
 
 		if (!m_ai_tanks.empty()) {
 			for (int i = 0; i < m_ai_tanks.size(); ++i) {
 				m_ai_tanks[i].update(delta, i);
+			}
+		}
+
+		if (total_time_seconds % 10 == 0 && m_boosts.empty() && total_time_seconds != 0) {
+			
+			int x = std::rand() % 101;
+
+			if (x % 2 == 0) {
+				sf::Vector2f position = random_spawn_point();
+				m_boosts.push_back(BoostSprite("speedboost.png", 2, position));
+				m_boost_spawn_time = m_total_time;
+			}
+			else {
+				sf::Vector2f position = random_spawn_point();
+				m_boosts.push_back(BoostSprite("heart.png", 1, position));
+				m_boost_spawn_time = m_total_time;
+			}		
+		}
+		if ((m_total_time - m_boost_spawn_time) >= std::chrono::seconds{ 5 }) {
+			m_boosts.clear();
+		}
+
+		if (!m_boosts.empty()) {
+			sf::FloatRect boost_bounds = m_boosts[0].get_bounds();
+			uint32_t boost_id = m_boosts[0].get_boost_id();
+		
+			if (player_tank_bounds.findIntersection(boost_bounds) && boost_id == 1) {
+				m_life_boost->activate(&m_player_tank);
+				uint32_t player_life = m_player_tank.get_life();
+				// Convert integer to string
+				std::stringstream pl;
+				pl << player_life;
+				std::string playerLifeString = pl.str();
+				m_life_text.setString(playerLifeString);
+				m_boosts.clear();
+			}
+			if (player_tank_bounds.findIntersection(boost_bounds) && boost_id == 2) {
+				m_speed_boost->activate(&m_player_tank);
+				m_boosts.clear();
 			}
 		}
 	}
@@ -126,16 +185,9 @@ void Game::update()
 		uint32_t proj_owner_team_id = proj.get_owner_team_id();
 		float projectile_distance = proj.get_projectile_distance();
 
-		sf::FloatRect projectile_bounds = m_projectile_vector[i].get_projectile_bounds();
+		sf::FloatRect projectile_bounds = m_projectile_vector[i].get_projectile_bounds();		
 
-		sf::FloatRect ai_base_bounds = m_ai_base.get_bounds();
-		sf::Vector2f ai_base_position = m_ai_base.get_position();
-
-		sf::FloatRect player_tank_bounds = m_player_tank.get_tank_bounds();
-		sf::Vector2f player_tank_position = m_player_tank.get_position();
-
-		sf::FloatRect player_base_bounds = m_player_base.get_bounds();
-		sf::Vector2f player_base_position = m_player_base.get_position();
+		calibrate_projectile(proj);
 
 		if (proj_owner_team_id == 1) {
 			proj.update(delta);
@@ -174,14 +226,16 @@ void Game::update()
 
 					if (m_ai_tanks[j].m_tank_attack_type == AiTank::defence) {
 						m_ai_tanks.erase(m_ai_tanks.begin() + j);
-						m_ai_tanks.push_back(AiTank("aitank.png", 10, 1, 60.f, 0, AiTank::defence));
+						m_ai_tanks.push_back(AiTank("aitank.png", 1, 10, 1, 60.f, 0, AiTank::defence));
 						m_ai_tanks.back().initialize(m_ai_spawn_pos[0]);
 					}
 					else {
 						m_ai_tanks.erase(m_ai_tanks.begin() + j);
-						m_ai_tanks.push_back(AiTank("aitank.png", 10, 1, 60.f, 0, AiTank::attack));
-						int position = rand() % 3;
-						m_ai_tanks.back().initialize(m_ai_spawn_pos[position]);
+						m_ai_tanks.push_back(AiTank("aitank.png", 1, 10, 1, 60.f, 0, AiTank::attack));
+						/*int position = rand() % 3;
+						m_ai_tanks.back().initialize(m_ai_spawn_pos[position]);*/
+						sf::Vector2f position = random_spawn_point();
+						m_ai_tanks.back().initialize(sf::Vector2f(position.x + m_tank_offset, position.y + m_tank_offset));
 					}
 				}
 				else {
@@ -220,10 +274,17 @@ void Game::draw(std::unique_ptr<sf::RenderWindow>& window)
 	if (m_game_state == game_state::gs_game_start)
 	{	
 		window->draw(*m_map);
-		window->draw(m_life);
+		window->draw(m_player_life);
 		window->draw(m_kill_count_icon);
 		window->draw(m_kill_count_text);
 		window->draw(m_life_text);
+		if (!m_boosts.empty())
+		{
+			for (int j = 0; j < m_boosts.size(); ++j)
+			{
+				m_boosts[j].draw(window);
+			}
+		}
 		m_player_base.draw(window);
 		m_ai_base.draw(window);
 		m_player_tank.draw(window);
@@ -232,7 +293,7 @@ void Game::draw(std::unique_ptr<sf::RenderWindow>& window)
 				m_ai_tanks[i].draw(window);
 			}			
 		}
-		m_animation.draw(window);
+		m_animation.draw(window);		
 	}
 
 	if (!m_projectile_vector.empty())
@@ -246,71 +307,134 @@ void Game::draw(std::unique_ptr<sf::RenderWindow>& window)
 	window->display();
 }
 
-void Game::gather_input(input_event events)
-{	
-	sf::FloatRect start_bounds = m_start_button.getGlobalBounds();
-	
-	if (!events.mouse_events.empty() && m_game_state == gs_menu)
-	{
-		for (int i = 0; i < events.mouse_events.size(); ++i)
-		{
-			if (events.mouse_events[i].left_button_pressed)
+//void Game::gather_input(input_event events)
+//{	
+//	sf::FloatRect start_bounds = m_start_button.getGlobalBounds();
+//	
+//	if (!events.mouse_events.empty() && m_game_state == gs_menu)
+//	{
+//		for (int i = 0; i < events.mouse_events.size(); ++i)
+//		{
+//			if (events.mouse_events[i].left_button_pressed)
+//			{
+//				if (start_bounds.contains((sf::Vector2f)(events.mouse_events[i].position)))
+//				{
+//					m_game_state = gs_game_start;
+//				}
+//			}
+//		}
+//	}
+//	
+//
+//	if (!events.keyboard_events.empty())
+//	{		
+//		for (int i = 0; i < events.keyboard_events.size(); ++i)
+//		{
+//			if (events.keyboard_events[i].isPressed && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_W)
+//			{				
+//				m_input_state[input_event::keyboard_event::k_W] = true;			
+//			}
+//			if (events.keyboard_events[i].isPressed && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_D)
+//			{
+//				m_input_state[input_event::keyboard_event::k_D] = true;
+//			}
+//			if (events.keyboard_events[i].isPressed && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_A)
+//			{
+//				m_input_state[input_event::keyboard_event::k_A] = true;
+//			}
+//			if (events.keyboard_events[i].isPressed && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_S)
+//			{
+//				m_input_state[input_event::keyboard_event::k_S] = true;
+//			}
+//			if (events.keyboard_events[i].isPressed && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_Space)
+//			{				
+//				Command* command;
+//				command = new FireCommand;
+//				m_commands.push_back(command);						
+//			}
+//			if (events.keyboard_events[i].isReleased && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_W)
+//			{
+//				m_input_state[input_event::keyboard_event::k_W] = false;
+//			}
+//			if (events.keyboard_events[i].isReleased && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_A)
+//			{
+//				m_input_state[input_event::keyboard_event::k_A] = false;
+//			}
+//			if (events.keyboard_events[i].isReleased && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_S)
+//			{
+//				m_input_state[input_event::keyboard_event::k_S] = false;
+//			}
+//			if (events.keyboard_events[i].isReleased && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_D)
+//			{
+//				m_input_state[input_event::keyboard_event::k_D] = false;
+//			}
+//			if (events.keyboard_events[i].isReleased && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_Space)
+//			{
+//				m_input_state[input_event::keyboard_event::k_Space] = false;
+//			}
+//		}
+//	}
+//}
+
+void Game::process_input()
+{
+	InputEvent event;
+	sf::FloatRect start_bounds = m_start_button.getGlobalBounds();	
+
+	// Process the event queue
+	while (m_event_queue.hasEvents()) {
+
+		event = m_event_queue.popEvent();
+
+		switch (event.type) {
+		case InputEvent::Type::MouseClick:
+			// ... Handle mouse click event ...
+			if (start_bounds.contains(sf::Vector2f(event.position)))
 			{
-				if (start_bounds.contains((sf::Vector2f)(events.mouse_events[i].position)))
-				{
-					m_game_state = gs_game_start;
+				m_game_state = gs_game_start;
+			}
+			break;
+		case InputEvent::Type::ButtonClick:
+			// ... Handle key pressed event ...
+			if (event.buttonType == 0) {
+				if (event.buttonPressed == true) {
+					m_input_state[input_event::keyboard_event::k_W] = true;
+				}
+				else {
+					m_input_state[input_event::keyboard_event::k_W] = false;
 				}
 			}
-		}
-	}
-	
-
-	if (!events.keyboard_events.empty() && m_game_state == gs_game_start)
-	{		
-		for (int i = 0; i < events.keyboard_events.size(); ++i)
-		{
-			if (events.keyboard_events[i].isPressed && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_W)
-			{				
-				m_input_state[input_event::keyboard_event::k_W] = true;			
+			if (event.buttonType == 1) {
+				if (event.buttonPressed == true) {
+					m_input_state[input_event::keyboard_event::k_A] = true;
+				}
+				else {
+					m_input_state[input_event::keyboard_event::k_A] = false;
+				}
 			}
-			if (events.keyboard_events[i].isPressed && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_D)
-			{
-				m_input_state[input_event::keyboard_event::k_D] = true;
+			if (event.buttonType == 2) {
+				if (event.buttonPressed == true) {
+					m_input_state[input_event::keyboard_event::k_S] = true;
+				}
+				else {
+					m_input_state[input_event::keyboard_event::k_S] = false;
+				}
 			}
-			if (events.keyboard_events[i].isPressed && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_A)
-			{
-				m_input_state[input_event::keyboard_event::k_A] = true;
+			if (event.buttonType == 3) {
+				if (event.buttonPressed == true) {
+					m_input_state[input_event::keyboard_event::k_D] = true;
+				}
+				else {
+					m_input_state[input_event::keyboard_event::k_D] = false;
+				}
 			}
-			if (events.keyboard_events[i].isPressed && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_S)
-			{
-				m_input_state[input_event::keyboard_event::k_S] = true;
-			}
-			if (events.keyboard_events[i].isPressed && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_Space)
-			{				
+			if (event.buttonType == 4) {
 				Command* command;
 				command = new FireCommand;
-				m_commands.push_back(command);						
+				m_commands.push_back(command);
 			}
-			if (events.keyboard_events[i].isReleased && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_W)
-			{
-				m_input_state[input_event::keyboard_event::k_W] = false;
-			}
-			if (events.keyboard_events[i].isReleased && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_A)
-			{
-				m_input_state[input_event::keyboard_event::k_A] = false;
-			}
-			if (events.keyboard_events[i].isReleased && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_S)
-			{
-				m_input_state[input_event::keyboard_event::k_S] = false;
-			}
-			if (events.keyboard_events[i].isReleased && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_D)
-			{
-				m_input_state[input_event::keyboard_event::k_D] = false;
-			}
-			if (events.keyboard_events[i].isReleased && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_Space)
-			{
-				m_input_state[input_event::keyboard_event::k_Space] = false;
-			}
+
+			break;		
 		}
 	}
 }
@@ -335,6 +459,44 @@ int Game::count_inputs(input_array inputs)
 
 	return numberOfTrue;
 }
+
+sf::Vector2f Game::random_spawn_point()
+{
+	sf::Vector2f spawn_point;
+
+	int maxAttempts = 100; // Maximum number of attempts to find a walkable tile
+	int attempt = 0;
+
+	float default_x = (13 * 32);
+	float default_y = (2 * 32);
+
+	sf::Vector2u tile_size = m_map->get_tile_size();
+
+	do {
+
+		int x = rand() % 27;
+		int y = rand() % 20;
+		
+		bool walkable = m_map->get_tile_walkable_by_indices(x, y);
+
+		if (walkable) {
+			spawn_point.x = x * tile_size.x; // Multiply by tile width to get the actual position
+			spawn_point.y = y * tile_size.y; // Multiply by tile height to get the actual position
+			spawn_point = sf::Vector2f(spawn_point.x, spawn_point.y);
+			break; // Found a walkable tile, exit the loop
+		}
+
+		attempt++;
+	} while (attempt < maxAttempts);
+
+	// If no walkable tile was found after the maximum number of attempts, spawn at a default position
+	if (attempt >= maxAttempts) {
+		spawn_point = sf::Vector2f(default_x, default_y); // Set the default spawn position
+	}
+
+	return spawn_point;
+}
+
 
 void Game::calibrate_pos(sf::Vector2f& tank_position)
 {		
@@ -427,6 +589,18 @@ void Game::calibrate_position_moving_south_or_east(float& tank_position_axis, sf
 	}
 }
 
+void Game::calibrate_projectile(Projectile& proj)
+{
+	sf::Vector2f proj_position = proj.get_position();
+	bool piercable = m_map->get_tile_pierceable_by_coordinates(proj_position.x, proj_position.y);
+
+	if (!piercable) {
+	
+		m_animation.play(0, sf::Vector2f(proj_position.x, proj_position.y), "explosioneffect.png");
+		delete_projectile(proj);
+	}
+}
+
 sf::Vector2f Game::get_base_position()
 {
 	sf::Vector2f base_position = m_player_base.get_position();
@@ -471,6 +645,19 @@ void Game::delete_projectile(Projectile& proj)
 {
 	std::swap(proj, m_projectile_vector.back());
 	m_projectile_vector.pop_back();
+}
+
+void Game::push_input_event(InputEvent& event)
+{
+	m_event_queue.pushEvent(event);
+}
+
+void Game::input_event(int buttonType, bool buttonPressed, sf::Vector2i pos, InputEvent& event, InputEvent::Type eventType)
+{
+	event.type = eventType;
+	event.buttonType = buttonType;
+	event.buttonPressed = buttonPressed;
+	event.position = pos;
 }
 
 sf::Vector2f Game::separating_axis(const Tank& ai_tank, const Tank& player_tank, sf::Vector2f player_pos) {

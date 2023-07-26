@@ -16,6 +16,7 @@ public:
 	float get_projectile_distance();
 	sf::FloatRect get_projectile_bounds();
 	uint32_t get_owner_team_id();
+	const sf::Vector2f get_position() const;
 
 	Projectile(Tank* owner);
 

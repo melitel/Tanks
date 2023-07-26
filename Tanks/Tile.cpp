@@ -21,4 +21,9 @@ bool Tile::get_visible()
 	return m_view_through;
 }
 
+bool Tile::get_pierceable()
+{
+	return m_pierceable;
+}
+
 

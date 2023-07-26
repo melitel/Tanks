@@ -3,8 +3,6 @@
 
 extern Game* g_Game;
 
-std::unordered_map<std::string, sf::Texture*> TextureManager::m_textures;
-
 void Tank::update(float dt, int tank_i)
 {
 }
@@ -73,15 +71,20 @@ const sf::Angle Tank::getRotation() const
 	return m_tank.getRotation();
 }
 
-const sf::Vector2f& Tank::get_direction() const
-{
-	return m_direction;
-}
-
 const sf::Vector2f Tank::get_size() const
 {
 	sf::Vector2f tank_size = m_tank.getSize();
 	return tank_size;
+}
+
+float Tank::get_speed()
+{
+	return m_move_speed;
+}
+
+void Tank::modify_speed(float speed_boost)
+{
+	m_move_speed += speed_boost;
 }
 
 const sf::RectangleShape Tank::get_shape() const
@@ -90,19 +93,14 @@ const sf::RectangleShape Tank::get_shape() const
 	return tank_shape;
 }
 
-const uint32_t Tank::get_team_id() const
+void Tank::modify_life(unsigned int life_boost)
 {
-	return m_team_id;
+	m_life += life_boost;
 }
 
 void Tank::kill_count()
 {
 	m_kills_count += 1;
-}
-
-const uint32_t Tank::get_kill_count() const
-{
-	return m_kills_count;
 }
 
 bool Tank::if_first_bullet_shot()
@@ -112,6 +110,7 @@ bool Tank::if_first_bullet_shot()
 
 void Tank::first_bullet_shot()
 {
+
 }
 
 void Tank::last_projectile_shot_time(std::chrono::duration<float> time)
@@ -126,6 +125,7 @@ std::chrono::duration<float> Tank::when_last_projectile_shot()
 Tank& Tank::operator=(Tank& other)
 {
 	m_tank = other.m_tank;
+	m_life = other.m_life;
 	m_health = other.m_health;
 	m_damage = other.m_damage;
 	m_move_speed = other.m_move_speed;
@@ -138,6 +138,7 @@ Tank& Tank::operator=(Tank& other)
 Tank::Tank(const Tank& other)
 {
 	m_tank = other.m_tank;
+	m_life = other.m_life;
 	m_health = other.m_health;
 	m_damage = other.m_damage;
 	m_move_speed = other.m_move_speed;
@@ -149,6 +150,7 @@ Tank::Tank(const Tank& other)
 Tank& Tank::operator=(Tank&& other) noexcept
 {
 	std::swap(m_tank, other.m_tank);
+	std::swap(m_life, other.m_life);
 	std::swap(m_health, other.m_health);
 	std::swap(m_damage, other.m_damage);
 	std::swap(m_move_speed, other.m_move_speed);
@@ -161,6 +163,7 @@ Tank& Tank::operator=(Tank&& other) noexcept
 Tank::Tank(Tank&& other) noexcept
 {
 	std::swap(m_tank, other.m_tank);
+	std::swap(m_life, other.m_life);
 	std::swap(m_health, other.m_health);
 	std::swap(m_damage, other.m_damage);
 	std::swap(m_move_speed, other.m_move_speed);

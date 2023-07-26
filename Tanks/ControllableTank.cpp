@@ -21,8 +21,6 @@ void ControllableTank::update(float dt, int tank_i)
 
 void ControllableTank::move_controller(float delta)
 {
-	Game::input_event events;
-	Game::input_event::mouse_event input_mouse_event;
 	Game::input_event::keyboard_event input_key_event;
 
 	int inputs_count = g_Game->count_inputs(g_Game->m_input_state);

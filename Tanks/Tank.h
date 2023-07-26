@@ -25,12 +25,14 @@ public:
 
 	Tank(
 		const std::string& textureFilename,
+		unsigned int life,
 		unsigned int health,
 		unsigned int damage,
 		float move_speed,
 		uint32_t team_id,
 		attack_type tank_attack_type
 	) :
+		m_life(life),
 		m_health(health),
 		m_damage(damage),
 		m_move_speed(move_speed),
@@ -59,12 +61,16 @@ public:
 	void set_position(sf::Vector2f pos);
 	const sf::FloatRect get_tank_bounds() const;
 	const sf::Angle getRotation() const;
-	const sf::Vector2f& get_direction() const;
+	const sf::Vector2f& get_direction() const { return m_direction; }
 	const sf::Vector2f get_size() const;
+	float get_speed();
+	void modify_speed(float speed_boost);
 	const sf::RectangleShape get_shape() const;
-	const uint32_t get_team_id() const;
+	const uint32_t get_team_id() const { return m_team_id; }
+	const unsigned int get_life() const { return m_life; }
+	void modify_life(unsigned int life_boost);
 	void kill_count();
-	const uint32_t get_kill_count() const;
+	const uint32_t get_kill_count() const { return m_kills_count; }
 	virtual bool if_first_bullet_shot();
 	virtual void first_bullet_shot();
 	virtual void last_projectile_shot_time(std::chrono::duration<float> time);
@@ -82,6 +88,7 @@ protected:
 	const uint32_t m_tank_offset = 16;
 	sf::Texture* m_tankTexture;
 	sf::RectangleShape m_tank;
+	unsigned int m_life;
 	unsigned int m_health;
 	unsigned int m_damage;
 	float m_move_speed;

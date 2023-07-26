@@ -62,8 +62,7 @@ void Projectile::draw(std::unique_ptr<sf::RenderWindow>& window)
 
 void Projectile::update(float delta)
 {
-	move_projectile(delta);
-	
+	move_projectile(delta);	
 }
 
 void Projectile::move_projectile(float delta)
@@ -96,6 +95,11 @@ sf::FloatRect Projectile::get_projectile_bounds()
 uint32_t Projectile::get_owner_team_id()
 {
 	return m_owner->get_team_id();
+}
+
+const sf::Vector2f Projectile::get_position() const
+{
+	return m_projectile.getPosition();
 }
 
 Projectile::Projectile(Tank* owner)

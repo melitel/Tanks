@@ -129,6 +129,15 @@ bool TileMap::get_tile_walkable_by_coordinates(int x, int y)
 	return get_tile_walkable;
 }
 
+bool TileMap::get_tile_pierceable_by_coordinates(int x, int y)
+{
+	int tileX = x / m_tile_size.x;
+	int tileY = y / m_tile_size.y;
+	bool pierceable = m_tiles_map[tileY][tileX]->get_pierceable();
+
+	return pierceable;
+}
+
 sf::Vector2i TileMap::get_tile_coordinates(int x, int y)
 {
 	int tileX = x / m_tile_size.x;
