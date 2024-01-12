@@ -12,25 +12,27 @@ public:
 	void rotate_base(sf::Angle angle);
 	sf::Vector2f get_position();
 	sf::FloatRect get_bounds();
+	const unsigned int get_life() const { return m_base_health; }
+	void modify_life(int modifier);
 
 	Base(
 		unsigned int health,
-		unsigned int damage,
+		//unsigned int damage,
 		uint32_t team_id
 	) :
 		m_base_health(health),
-		m_base_damage(damage),
+		//m_base_damage(damage),
 		m_team_id(team_id)
 	{}
 
 private:
 
 	const uint32_t m_base_width = 48;
-	const uint32_t m_base_height = 56;
+	const uint32_t m_base_height = 48;
 	sf::RectangleShape m_base;
 	sf::Texture m_base_texture;
 	unsigned int m_base_health;
-	unsigned int m_base_damage;
+	//unsigned int m_base_damage;
 	uint32_t m_team_id;
 
 };

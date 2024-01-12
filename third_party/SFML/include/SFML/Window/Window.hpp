@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2022 Laurent Gomila (laurent@sfml-dev.org)
+// Copyright (C) 2007-2023 Laurent Gomila (laurent@sfml-dev.org)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -22,17 +22,17 @@
 //
 ////////////////////////////////////////////////////////////
 
-#ifndef SFML_WINDOW_HPP
-#define SFML_WINDOW_HPP
+#pragma once
 
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/System/Clock.hpp>
-#include <SFML/System/Time.hpp>
 #include <SFML/Window/ContextSettings.hpp>
 #include <SFML/Window/GlResource.hpp>
 #include <SFML/Window/WindowBase.hpp>
+
+#include <SFML/System/Clock.hpp>
+#include <SFML/System/Time.hpp>
 
 #include <memory>
 
@@ -44,7 +44,7 @@ namespace priv
 class GlContext;
 }
 
-class Event;
+struct Event;
 
 ////////////////////////////////////////////////////////////
 /// \brief Window that serves as a target for OpenGL rendering
@@ -221,7 +221,7 @@ public:
     /// SFML will try to match the given limit as much as it can,
     /// but since it internally uses sf::sleep, whose precision
     /// depends on the underlying OS, the results may be a little
-    /// unprecise as well (for example, you can get 65 FPS when
+    /// imprecise as well (for example, you can get 65 FPS when
     /// requesting 60).
     ///
     /// \param limit Framerate limit, in frames per seconds (use 0 to disable limit)
@@ -259,20 +259,6 @@ public:
 
 private:
     ////////////////////////////////////////////////////////////
-    /// \brief Processes an event before it is sent to the user
-    ///
-    /// This function is called every time an event is received
-    /// from the internal window (through pollEvent or waitEvent).
-    /// It filters out unwanted events, and performs whatever internal
-    /// stuff the window needs before the event is returned to the
-    /// user.
-    ///
-    /// \param event Event to filter
-    ///
-    ////////////////////////////////////////////////////////////
-    bool filterEvent(const Event& event);
-
-    ////////////////////////////////////////////////////////////
     /// \brief Perform some common internal initializations
     ///
     ////////////////////////////////////////////////////////////
@@ -287,9 +273,6 @@ private:
 };
 
 } // namespace sf
-
-
-#endif // SFML_WINDOW_HPP
 
 
 ////////////////////////////////////////////////////////////
@@ -329,7 +312,7 @@ private:
 /// Usage example:
 /// \code
 /// // Declare and create a new window
-/// sf::Window window(sf::VideoMode(800, 600), "SFML window");
+/// sf::Window window(sf::VideoMode({800, 600}), "SFML window");
 ///
 /// // Limit the framerate to 60 frames per second (this step is optional)
 /// window.setFramerateLimit(60);

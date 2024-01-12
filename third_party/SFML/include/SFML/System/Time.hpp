@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2022 Laurent Gomila (laurent@sfml-dev.org)
+// Copyright (C) 2007-2023 Laurent Gomila (laurent@sfml-dev.org)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -22,8 +22,7 @@
 //
 ////////////////////////////////////////////////////////////
 
-#ifndef SFML_TIME_HPP
-#define SFML_TIME_HPP
+#pragma once
 
 ////////////////////////////////////////////////////////////
 // Headers
@@ -31,6 +30,9 @@
 #include <SFML/System/Export.hpp>
 
 #include <chrono>
+#include <ratio>
+
+#include <cassert>
 #include <cstdint>
 
 
@@ -108,6 +110,7 @@ public:
     ////////////////////////////////////////////////////////////
     // Static member data
     ////////////////////////////////////////////////////////////
+    // NOLINTNEXTLINE(readability-identifier-naming)
     static const Time Zero; //!< Predefined "zero" time value
 
 private:
@@ -115,11 +118,10 @@ private:
     friend constexpr Time milliseconds(std::int32_t);
     friend constexpr Time microseconds(std::int64_t);
 
-private:
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-    std::chrono::microseconds m_microseconds; //!< Time value stored as microseconds
+    std::chrono::microseconds m_microseconds{}; //!< Time value stored as microseconds
 };
 
 ////////////////////////////////////////////////////////////
@@ -451,9 +453,6 @@ constexpr Time& operator%=(Time& left, Time right);
 #include <SFML/System/Time.inl>
 
 } // namespace sf
-
-
-#endif // SFML_TIME_HPP
 
 
 ////////////////////////////////////////////////////////////

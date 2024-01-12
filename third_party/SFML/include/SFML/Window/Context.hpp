@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2022 Laurent Gomila (laurent@sfml-dev.org)
+// Copyright (C) 2007-2023 Laurent Gomila (laurent@sfml-dev.org)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -22,19 +22,20 @@
 //
 ////////////////////////////////////////////////////////////
 
-#ifndef SFML_CONTEXT_HPP
-#define SFML_CONTEXT_HPP
+#pragma once
 
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
 #include <SFML/Window/Export.hpp>
 
-#include <SFML/System/Vector2.hpp>
 #include <SFML/Window/GlResource.hpp>
 
-#include <cstdint>
+#include <SFML/System/Vector2.hpp>
+
 #include <memory>
+
+#include <cstdint>
 
 
 namespace sf
@@ -82,6 +83,18 @@ public:
     ///
     ////////////////////////////////////////////////////////////
     Context& operator=(const Context&) = delete;
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Move constructor
+    ///
+    ////////////////////////////////////////////////////////////
+    Context(Context&& context) noexcept;
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Move assignment
+    ///
+    ////////////////////////////////////////////////////////////
+    Context& operator=(Context&& context) noexcept;
 
     ////////////////////////////////////////////////////////////
     /// \brief Activate or deactivate explicitly the context
@@ -170,8 +183,6 @@ private:
 
 } // namespace sf
 
-
-#endif // SFML_CONTEXT_HPP
 
 ////////////////////////////////////////////////////////////
 /// \class sf::Context

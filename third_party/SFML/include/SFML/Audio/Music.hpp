@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2022 Laurent Gomila (laurent@sfml-dev.org)
+// Copyright (C) 2007-2023 Laurent Gomila (laurent@sfml-dev.org)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -22,8 +22,7 @@
 //
 ////////////////////////////////////////////////////////////
 
-#ifndef SFML_MUSIC_HPP
-#define SFML_MUSIC_HPP
+#pragma once
 
 ////////////////////////////////////////////////////////////
 // Headers
@@ -34,7 +33,6 @@
 #include <SFML/Audio/SoundStream.hpp>
 
 #include <filesystem>
-#include <string>
 #include <vector>
 
 
@@ -57,37 +55,12 @@ public:
     template <typename T>
     struct Span
     {
-        ////////////////////////////////////////////////////////////
-        /// \brief Default constructor
-        ///
-        ////////////////////////////////////////////////////////////
-        Span()
-        {
-        }
-
-        ////////////////////////////////////////////////////////////
-        /// \brief Initialization constructor
-        ///
-        /// \param off Initial Offset
-        /// \param len Initial Length
-        ///
-        ////////////////////////////////////////////////////////////
-        Span(T off, T len) : offset(off), length(len)
-        {
-        }
-
-        T offset; //!< The beginning offset of the time range
-        T length; //!< The length of the time range
+        T offset{}; //!< The beginning offset of the time range
+        T length{}; //!< The length of the time range
     };
 
     // Define the relevant Span types
     using TimeSpan = Span<Time>;
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Default constructor
-    ///
-    ////////////////////////////////////////////////////////////
-    Music();
 
     ////////////////////////////////////////////////////////////
     /// \brief Destructor
@@ -278,9 +251,6 @@ private:
 };
 
 } // namespace sf
-
-
-#endif // SFML_MUSIC_HPP
 
 
 ////////////////////////////////////////////////////////////

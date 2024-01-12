@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2022 Laurent Gomila (laurent@sfml-dev.org)
+// Copyright (C) 2007-2023 Laurent Gomila (laurent@sfml-dev.org)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -22,8 +22,7 @@
 //
 ////////////////////////////////////////////////////////////
 
-#ifndef SFML_MEMORYINPUTSTREAM_HPP
-#define SFML_MEMORYINPUTSTREAM_HPP
+#pragma once
 
 ////////////////////////////////////////////////////////////
 // Headers
@@ -34,6 +33,7 @@
 
 #include <SFML/System/InputStream.hpp>
 
+#include <cstddef>
 #include <cstdlib>
 
 
@@ -46,12 +46,6 @@ namespace sf
 class SFML_SYSTEM_API MemoryInputStream : public InputStream
 {
 public:
-    ////////////////////////////////////////////////////////////
-    /// \brief Default constructor
-    ///
-    ////////////////////////////////////////////////////////////
-    MemoryInputStream();
-
     ////////////////////////////////////////////////////////////
     /// \brief Open the stream from its data
     ///
@@ -105,15 +99,12 @@ private:
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-    const char*  m_data;   //!< Pointer to the data in memory
-    std::int64_t m_size;   //!< Total size of the data
-    std::int64_t m_offset; //!< Current reading position
+    const std::byte* m_data{};   //!< Pointer to the data in memory
+    std::int64_t     m_size{};   //!< Total size of the data
+    std::int64_t     m_offset{}; //!< Current reading position
 };
 
 } // namespace sf
-
-
-#endif // SFML_MEMORYINPUTSTREAM_HPP
 
 
 ////////////////////////////////////////////////////////////

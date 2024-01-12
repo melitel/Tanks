@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2022 Laurent Gomila (laurent@sfml-dev.org)
+// Copyright (C) 2007-2023 Laurent Gomila (laurent@sfml-dev.org)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -22,8 +22,7 @@
 //
 ////////////////////////////////////////////////////////////
 
-#ifndef SFML_FONT_HPP
-#define SFML_FONT_HPP
+#pragma once
 
 ////////////////////////////////////////////////////////////
 // Headers
@@ -66,43 +65,6 @@ public:
     {
         std::string family; //!< The font family
     };
-
-public:
-    ////////////////////////////////////////////////////////////
-    /// \brief Default constructor
-    ///
-    /// This constructor defines an empty font
-    ///
-    ////////////////////////////////////////////////////////////
-    Font();
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Copy constructor
-    ///
-    /// \param copy Instance to copy
-    ///
-    ////////////////////////////////////////////////////////////
-    Font(const Font& copy);
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Move constructor
-    ///
-    ////////////////////////////////////////////////////////////
-    Font(Font&&) noexcept;
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Move assignment
-    ///
-    ////////////////////////////////////////////////////////////
-    Font& operator=(Font&&) noexcept;
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Destructor
-    ///
-    /// Cleans up all the internal resources used by the font
-    ///
-    ////////////////////////////////////////////////////////////
-    ~Font();
 
     ////////////////////////////////////////////////////////////
     /// \brief Load the font from a file
@@ -319,16 +281,6 @@ public:
     ////////////////////////////////////////////////////////////
     bool isSmooth() const;
 
-    ////////////////////////////////////////////////////////////
-    /// \brief Overload of assignment operator
-    ///
-    /// \param right Instance to assign
-    ///
-    /// \return Reference to self
-    ///
-    ////////////////////////////////////////////////////////////
-    Font& operator=(const Font& right);
-
 private:
     ////////////////////////////////////////////////////////////
     /// \brief Structure defining a row of glyphs
@@ -336,13 +288,13 @@ private:
     ////////////////////////////////////////////////////////////
     struct Row
     {
-        Row(unsigned int rowTop, unsigned int rowHeight) : width(0), top(rowTop), height(rowHeight)
+        Row(unsigned int rowTop, unsigned int rowHeight) : top(rowTop), height(rowHeight)
         {
         }
 
-        unsigned int width;  //!< Current width of the row
-        unsigned int top;    //!< Y position of the row into the texture
-        unsigned int height; //!< Height of the row
+        unsigned int width{}; //!< Current width of the row
+        unsigned int top;     //!< Y position of the row into the texture
+        unsigned int height;  //!< Height of the row
     };
 
     ////////////////////////////////////////////////////////////
@@ -358,10 +310,10 @@ private:
     {
         explicit Page(bool smooth);
 
-        GlyphTable       glyphs;  //!< Table mapping code points to their corresponding glyph
-        Texture          texture; //!< Texture containing the pixels of the glyphs
-        unsigned int     nextRow; //!< Y position of the next new row in the texture
-        std::vector<Row> rows;    //!< List containing the position of all the existing rows
+        GlyphTable       glyphs;     //!< Table mapping code points to their corresponding glyph
+        Texture          texture;    //!< Texture containing the pixels of the glyphs
+        unsigned int     nextRow{3}; //!< Y position of the next new row in the texture
+        std::vector<Row> rows;       //!< List containing the position of all the existing rows
     };
 
     ////////////////////////////////////////////////////////////
@@ -417,26 +369,23 @@ private:
     ////////////////////////////////////////////////////////////
     // Types
     ////////////////////////////////////////////////////////////
-    class FontHandles;
+    struct FontHandles;
     using PageTable = std::unordered_map<unsigned int, Page>; //!< Table mapping a character size to its page (texture)
 
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-    std::shared_ptr<FontHandles> m_fontHandles; //!< Shared information about the internal font instance
-    bool                         m_isSmooth;    //!< Status of the smooth filter
-    Info                         m_info;        //!< Information about the font
-    mutable PageTable            m_pages;       //!< Table containing the glyphs pages by character size
+    std::shared_ptr<FontHandles> m_fontHandles;    //!< Shared information about the internal font instance
+    bool                         m_isSmooth{true}; //!< Status of the smooth filter
+    Info                         m_info;           //!< Information about the font
+    mutable PageTable            m_pages;          //!< Table containing the glyphs pages by character size
     mutable std::vector<std::uint8_t> m_pixelBuffer; //!< Pixel buffer holding a glyph's pixels before being written to the texture
 #ifdef SFML_SYSTEM_ANDROID
-    std::unique_ptr<priv::ResourceStream> m_stream; //!< Asset file streamer (if loaded from file)
+    std::shared_ptr<priv::ResourceStream> m_stream; //!< Asset file streamer (if loaded from file)
 #endif
 };
 
 } // namespace sf
-
-
-#endif // SFML_FONT_HPP
 
 
 ////////////////////////////////////////////////////////////
@@ -485,14 +434,12 @@ private:
 /// }
 ///
 /// // Create a text which uses our font
-/// sf::Text text1;
-/// text1.setFont(font);
+/// sf::Text text1(font);
 /// text1.setCharacterSize(30);
 /// text1.setStyle(sf::Text::Regular);
 ///
 /// // Create another text using the same font, but with different parameters
-/// sf::Text text2;
-/// text2.setFont(font);
+/// sf::Text text2(font);
 /// text2.setCharacterSize(50);
 /// text2.setStyle(sf::Text::Italic);
 /// \endcode

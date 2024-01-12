@@ -38,3 +38,8 @@ sf::FloatRect Base::get_bounds()
 {	
 	return m_base.getGlobalBounds();
 }
+
+void Base::modify_life(int modifier)
+{
+	m_base_health += modifier;
+}

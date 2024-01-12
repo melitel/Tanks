@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2022 Laurent Gomila (laurent@sfml-dev.org)
+// Copyright (C) 2007-2023 Laurent Gomila (laurent@sfml-dev.org)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -22,8 +22,7 @@
 //
 ////////////////////////////////////////////////////////////
 
-#ifndef SFML_SOCKET_HPP
-#define SFML_SOCKET_HPP
+#pragma once
 
 ////////////////////////////////////////////////////////////
 // Headers
@@ -63,12 +62,9 @@ public:
     /// \brief Some special values used by sockets
     ///
     ////////////////////////////////////////////////////////////
-    enum
-    {
-        AnyPort = 0 //!< Special value that tells the system to pick any available port
-    };
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    static constexpr unsigned short AnyPort{0}; //!< Special value that tells the system to pick any available port
 
-public:
     ////////////////////////////////////////////////////////////
     /// \brief Destructor
     ///
@@ -86,6 +82,18 @@ public:
     ///
     ////////////////////////////////////////////////////////////
     Socket& operator=(const Socket&) = delete;
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Move constructor
+    ///
+    ////////////////////////////////////////////////////////////
+    Socket(Socket&& socket) noexcept;
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Move assignment
+    ///
+    ////////////////////////////////////////////////////////////
+    Socket& operator=(Socket&& socket) noexcept;
 
     ////////////////////////////////////////////////////////////
     /// \brief Set the blocking state of the socket
@@ -147,7 +155,7 @@ protected:
     /// \return The internal (OS-specific) handle of the socket
     ///
     ////////////////////////////////////////////////////////////
-    SocketHandle getHandle() const;
+    SocketHandle getNativeHandle() const;
 
     ////////////////////////////////////////////////////////////
     /// \brief Create the internal representation of the socket
@@ -182,15 +190,12 @@ private:
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-    Type         m_type;       //!< Type of the socket (TCP or UDP)
-    SocketHandle m_socket;     //!< Socket descriptor
-    bool         m_isBlocking; //!< Current blocking mode of the socket
+    Type         m_type;             //!< Type of the socket (TCP or UDP)
+    SocketHandle m_socket;           //!< Socket descriptor
+    bool         m_isBlocking{true}; //!< Current blocking mode of the socket
 };
 
 } // namespace sf
-
-
-#endif // SFML_SOCKET_HPP
 
 
 ////////////////////////////////////////////////////////////

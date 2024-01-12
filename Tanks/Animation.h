@@ -12,8 +12,8 @@ public:
 	bool is_playing() const { return m_state == as_active; }
 
 
-	uint32_t get_frame_id();
-	uint32_t get_animation_id();
+	const uint32_t get_frame_id() const { return m_frame_id; }
+	const uint32_t get_animation_id() const { return m_animation_id; }
 
 private:
 

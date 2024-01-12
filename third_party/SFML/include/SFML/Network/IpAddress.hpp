@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2022 Laurent Gomila (laurent@sfml-dev.org)
+// Copyright (C) 2007-2023 Laurent Gomila (laurent@sfml-dev.org)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -22,8 +22,7 @@
 //
 ////////////////////////////////////////////////////////////
 
-#ifndef SFML_IPADDRESS_HPP
-#define SFML_IPADDRESS_HPP
+#pragma once
 
 ////////////////////////////////////////////////////////////
 // Headers
@@ -161,9 +160,11 @@ public:
     ////////////////////////////////////////////////////////////
     // Static member data
     ////////////////////////////////////////////////////////////
+    // NOLINTBEGIN(readability-identifier-naming)
     static const IpAddress Any;       //!< Value representing any address (0.0.0.0)
     static const IpAddress LocalHost; //!< The "localhost" address (for connecting a computer to itself locally)
     static const IpAddress Broadcast; //!< The "broadcast" address (for sending UDP messages to everyone on a local network)
+    // NOLINTEND(readability-identifier-naming)
 
 private:
     friend SFML_NETWORK_API bool operator<(const IpAddress& left, const IpAddress& right);
@@ -263,9 +264,6 @@ SFML_NETWORK_API std::istream& operator>>(std::istream& stream, std::optional<Ip
 SFML_NETWORK_API std::ostream& operator<<(std::ostream& stream, const IpAddress& address);
 
 } // namespace sf
-
-
-#endif // SFML_IPADDRESS_HPP
 
 
 ////////////////////////////////////////////////////////////

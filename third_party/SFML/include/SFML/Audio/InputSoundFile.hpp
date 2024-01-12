@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2022 Laurent Gomila (laurent@sfml-dev.org)
+// Copyright (C) 2007-2023 Laurent Gomila (laurent@sfml-dev.org)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -22,25 +22,25 @@
 //
 ////////////////////////////////////////////////////////////
 
-#ifndef SFML_INPUTSOUNDFILE_HPP
-#define SFML_INPUTSOUNDFILE_HPP
+#pragma once
 
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
 #include <SFML/Audio/Export.hpp>
 
-#include <cstddef>
+#include <SFML/Audio/SoundFileReader.hpp>
+
 #include <filesystem>
 #include <memory>
-#include <string>
+
+#include <cstddef>
 
 
 namespace sf
 {
 class Time;
 class InputStream;
-class SoundFileReader;
 
 ////////////////////////////////////////////////////////////
 /// \brief Provide read access to sound files
@@ -49,30 +49,6 @@ class SoundFileReader;
 class SFML_AUDIO_API InputSoundFile
 {
 public:
-    ////////////////////////////////////////////////////////////
-    /// \brief Default constructor
-    ///
-    ////////////////////////////////////////////////////////////
-    InputSoundFile();
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Destructor
-    ///
-    ////////////////////////////////////////////////////////////
-    ~InputSoundFile();
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Deleted copy constructor
-    ///
-    ////////////////////////////////////////////////////////////
-    InputSoundFile(const InputSoundFile&) = delete;
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Deleted copy assignment
-    ///
-    ////////////////////////////////////////////////////////////
-    InputSoundFile& operator=(const InputSoundFile&) = delete;
-
     ////////////////////////////////////////////////////////////
     /// \brief Open a sound file from the disk for reading
     ///
@@ -224,7 +200,7 @@ private:
     /// \brief Deleter for input streams that only conditionally deletes
     ///
     ////////////////////////////////////////////////////////////
-    struct StreamDeleter
+    struct SFML_AUDIO_API StreamDeleter
     {
         StreamDeleter(bool theOwned);
 
@@ -234,24 +210,21 @@ private:
 
         void operator()(InputStream* ptr) const;
 
-        bool owned;
+        bool owned{true};
     };
 
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-    std::unique_ptr<SoundFileReader>            m_reader;       //!< Reader that handles I/O on the file's format
-    std::unique_ptr<InputStream, StreamDeleter> m_stream;       //!< Input stream used to access the file's data
-    std::uint64_t                               m_sampleOffset; //!< Sample Read Position
-    std::uint64_t                               m_sampleCount;  //!< Total number of samples in the file
-    unsigned int                                m_channelCount; //!< Number of channels of the sound
-    unsigned int                                m_sampleRate;   //!< Number of samples per second
+    std::unique_ptr<SoundFileReader>            m_reader; //!< Reader that handles I/O on the file's format
+    std::unique_ptr<InputStream, StreamDeleter> m_stream{nullptr, false}; //!< Input stream used to access the file's data
+    std::uint64_t                               m_sampleOffset{};         //!< Sample Read Position
+    std::uint64_t                               m_sampleCount{};          //!< Total number of samples in the file
+    unsigned int                                m_channelCount{};         //!< Number of channels of the sound
+    unsigned int                                m_sampleRate{};           //!< Number of samples per second
 };
 
 } // namespace sf
-
-
-#endif // SFML_INPUTSOUNDFILE_HPP
 
 
 ////////////////////////////////////////////////////////////

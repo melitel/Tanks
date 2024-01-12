@@ -61,7 +61,12 @@ void Projectile::draw(std::unique_ptr<sf::RenderWindow>& window)
 }
 
 void Projectile::update(float delta)
-{	
+{
+	move_projectile(delta);	
+}
+
+void Projectile::move_projectile(float delta)
+{
 	m_projectile.setScale(sf::Vector2f(1.f, 1.f));
 	sf::Vector2f p0 = m_projectile.getPosition();
 	sf::Vector2f vel = m_direction * m_projectile_speed;
@@ -76,6 +81,11 @@ float Projectile::distance_update(float delta)
 	return m_projectile_distance;
 }
 
+float Projectile::get_projectile_distance()
+{
+	return m_projectile_distance;
+}
+
 sf::FloatRect Projectile::get_projectile_bounds()
 {
 	return m_projectile.getGlobalBounds();
@@ -85,6 +95,11 @@ sf::FloatRect Projectile::get_projectile_bounds()
 uint32_t Projectile::get_owner_team_id()
 {
 	return m_owner->get_team_id();
+}
+
+const sf::Vector2f Projectile::get_position() const
+{
+	return m_projectile.getPosition();
 }
 
 Projectile::Projectile(Tank* owner)

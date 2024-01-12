@@ -3,6 +3,7 @@
 #include "WaterTile.h"
 #include "BushTile.h"
 #include "BrickTile.h"
+#include "HeaderTile.h"
 
 
 bool TileMap::load(const std::string& tileset)
@@ -12,7 +13,7 @@ bool TileMap::load(const std::string& tileset)
 		return false;	
 
 	// resize the vertex array to fit the level size
-	m_vertices.setPrimitiveType(sf::Triangles);
+	m_vertices.setPrimitiveType(sf::PrimitiveType::Triangles);
 	m_vertices.resize(m_width * m_height * 6);
 
 	// populate the vertex array, with one quad per tile
@@ -73,11 +74,11 @@ void TileMap::read_level_from_file(const std::string filename)
 	std::ifstream in_file;
 	in_file.open(filename);
 
-	m_tiles_map.resize(19);
+	m_tiles_map.resize(20);
 
 	if (in_file.is_open()) {
 
-		for (int rows = 0; rows != 19; rows++)
+		for (int rows = 0; rows != 20; rows++)
 		{
 			m_tiles_map[rows].resize(27);
 
@@ -102,6 +103,10 @@ void TileMap::read_level_from_file(const std::string filename)
 					{
 						m_tiles_map[rows][cols] = std::make_unique<BrickTile>();
 					}
+					else if (tile_id == 4)
+					{
+						m_tiles_map[rows][cols] = std::make_unique<HeaderTile>();
+					}
 				}			
 		}
 	}
@@ -122,6 +127,15 @@ bool TileMap::get_tile_walkable_by_coordinates(int x, int y)
 	bool get_tile_walkable = m_tiles_map[tileY][tileX]->get_walkable();
 
 	return get_tile_walkable;
+}
+
+bool TileMap::get_tile_pierceable_by_coordinates(int x, int y)
+{
+	int tileX = x / m_tile_size.x;
+	int tileY = y / m_tile_size.y;
+	bool pierceable = m_tiles_map[tileY][tileX]->get_pierceable();
+
+	return pierceable;
 }
 
 sf::Vector2i TileMap::get_tile_coordinates(int x, int y)

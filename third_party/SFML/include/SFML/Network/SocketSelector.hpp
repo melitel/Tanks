@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2022 Laurent Gomila (laurent@sfml-dev.org)
+// Copyright (C) 2007-2023 Laurent Gomila (laurent@sfml-dev.org)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -22,8 +22,7 @@
 //
 ////////////////////////////////////////////////////////////
 
-#ifndef SFML_SOCKETSELECTOR_HPP
-#define SFML_SOCKETSELECTOR_HPP
+#pragma once
 
 ////////////////////////////////////////////////////////////
 // Headers
@@ -65,6 +64,28 @@ public:
     ///
     ////////////////////////////////////////////////////////////
     SocketSelector(const SocketSelector& copy);
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Overload of assignment operator
+    ///
+    /// \param right Instance to assign
+    ///
+    /// \return Reference to self
+    ///
+    ////////////////////////////////////////////////////////////
+    SocketSelector& operator=(const SocketSelector& right);
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Move constructor
+    ///
+    ////////////////////////////////////////////////////////////
+    SocketSelector(SocketSelector&&) noexcept;
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Move assignment
+    ///
+    ////////////////////////////////////////////////////////////
+    SocketSelector& operator=(SocketSelector&&) noexcept;
 
     ////////////////////////////////////////////////////////////
     /// \brief Add a new socket to the selector
@@ -143,16 +164,6 @@ public:
     ////////////////////////////////////////////////////////////
     bool isReady(Socket& socket) const;
 
-    ////////////////////////////////////////////////////////////
-    /// \brief Overload of assignment operator
-    ///
-    /// \param right Instance to assign
-    ///
-    /// \return Reference to self
-    ///
-    ////////////////////////////////////////////////////////////
-    SocketSelector& operator=(const SocketSelector& right);
-
 private:
     struct SocketSelectorImpl;
 
@@ -163,9 +174,6 @@ private:
 };
 
 } // namespace sf
-
-
-#endif // SFML_SOCKETSELECTOR_HPP
 
 
 ////////////////////////////////////////////////////////////

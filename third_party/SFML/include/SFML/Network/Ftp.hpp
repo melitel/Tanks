@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2022 Laurent Gomila (laurent@sfml-dev.org)
+// Copyright (C) 2007-2023 Laurent Gomila (laurent@sfml-dev.org)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -22,8 +22,7 @@
 //
 ////////////////////////////////////////////////////////////
 
-#ifndef SFML_FTP_HPP
-#define SFML_FTP_HPP
+#pragma once
 
 ////////////////////////////////////////////////////////////
 // Headers
@@ -31,6 +30,7 @@
 #include <SFML/Network/Export.hpp>
 
 #include <SFML/Network/TcpSocket.hpp>
+
 #include <SFML/System/Time.hpp>
 
 #include <filesystem>
@@ -55,7 +55,7 @@ public:
     ////////////////////////////////////////////////////////////
     enum class TransferMode
     {
-        Binary, //!< Binary mode (file is transfered as a sequence of bytes)
+        Binary, //!< Binary mode (file is transferred as a sequence of bytes)
         Ascii,  //!< Text mode using ASCII encoding
         Ebcdic  //!< Text mode using EBCDIC encoding
     };
@@ -143,7 +143,7 @@ public:
         /// \param message Response message
         ///
         ////////////////////////////////////////////////////////////
-        explicit Response(Status code = Status::InvalidResponse, const std::string& message = "");
+        explicit Response(Status code = Status::InvalidResponse, std::string message = "");
 
         ////////////////////////////////////////////////////////////
         /// \brief Check if the status code means a success
@@ -502,10 +502,10 @@ public:
     /// \see download
     ///
     ////////////////////////////////////////////////////////////
-    [[nodiscard]] Response upload(const std::string& localFile,
-                                  const std::string& remotePath,
-                                  TransferMode       mode   = TransferMode::Binary,
-                                  bool               append = false);
+    [[nodiscard]] Response upload(const std::filesystem::path& localFile,
+                                  const std::filesystem::path& remotePath,
+                                  TransferMode                 mode   = TransferMode::Binary,
+                                  bool                         append = false);
 
     ////////////////////////////////////////////////////////////
     /// \brief Send a command to the FTP server
@@ -538,7 +538,7 @@ private:
     Response getResponse();
 
     ////////////////////////////////////////////////////////////
-    /// \brief Utility class for exchanging datas with the server
+    /// \brief Utility class for exchanging data with the server
     ///        on the data channel
     ///
     ////////////////////////////////////////////////////////////
@@ -554,9 +554,6 @@ private:
 };
 
 } // namespace sf
-
-
-#endif // SFML_FTP_HPP
 
 
 ////////////////////////////////////////////////////////////

@@ -47,17 +47,4 @@ void Animation::play(uint32_t animation_id, const sf::Vector2f& pos, const std::
 void Animation::draw(std::unique_ptr<sf::RenderWindow>& window)
 {
 	window->draw(m_explosion);
-
-}
-
-uint32_t Animation::get_frame_id() {
-
-	return m_frame_id;
-
-}
-
-uint32_t Animation::get_animation_id() {
-
-	return m_animation_id;
-
 }

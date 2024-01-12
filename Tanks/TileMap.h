@@ -14,6 +14,7 @@ public:
 	bool load(const std::string& tileset);
 	void read_level_from_file(const std::string filename);
 	bool get_tile_walkable_by_coordinates(int x, int y);
+	bool get_tile_pierceable_by_coordinates(int x, int y);
 	sf::Vector2i get_tile_coordinates(int x, int y);
 	bool get_tile_walkable_by_indices(int x, int y);
 	bool get_tile_view_through_by_indices(int x, int y);
@@ -24,7 +25,7 @@ public:
 private:
 	
 	unsigned int m_width = 27;
-	unsigned int m_height = 19;
+	unsigned int m_height = 20;
 	sf::Vector2u m_tile_size = sf::Vector2u(32, 32);
 	std::vector <std::vector<std::shared_ptr<Tile>>> m_tiles_map;
 	virtual void draw(sf::RenderTarget& target, const sf::RenderStates& states) const override;

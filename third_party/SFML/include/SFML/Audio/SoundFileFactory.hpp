@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2022 Laurent Gomila (laurent@sfml-dev.org)
+// Copyright (C) 2007-2023 Laurent Gomila (laurent@sfml-dev.org)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -22,17 +22,16 @@
 //
 ////////////////////////////////////////////////////////////
 
-#ifndef SFML_SOUNDFILEFACTORY_HPP
-#define SFML_SOUNDFILEFACTORY_HPP
+#pragma once
 
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
 #include <SFML/Audio/Export.hpp>
 
+#include <algorithm>
 #include <filesystem>
 #include <memory>
-#include <string>
 #include <vector>
 
 
@@ -153,15 +152,15 @@ private:
     ////////////////////////////////////////////////////////////
     // Static member data
     ////////////////////////////////////////////////////////////
-    static ReaderFactoryArray s_readers; //!< List of all registered readers
-    static WriterFactoryArray s_writers; //!< List of all registered writers
+    // NOLINTBEGIN(readability-identifier-naming)
+    static inline ReaderFactoryArray s_readers; //!< List of all registered readers
+    static inline WriterFactoryArray s_writers; //!< List of all registered writers
+    // NOLINTEND(readability-identifier-naming)
 };
 
 } // namespace sf
 
 #include <SFML/Audio/SoundFileFactory.inl>
-
-#endif // SFML_SOUNDFILEFACTORY_HPP
 
 
 ////////////////////////////////////////////////////////////

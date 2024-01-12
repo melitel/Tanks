@@ -13,69 +13,37 @@ void Tank::draw(std::unique_ptr<sf::RenderWindow>& window)
 
 }
 
-void Tank::initialize(const sf::Vector2f& pos, const std::string& name)
+void Tank::initialize(const sf::Vector2f& pos)
 {
 	m_tank.setOrigin(sf::Vector2f(float(m_tank_height/2), float (m_tank_width/2)));
 	m_tank.setPosition(pos);
 	m_tank.setSize(sf::Vector2f((float)m_tank_width, (float)m_tank_height));
-	if (!m_tank_texture.loadFromFile(name))
-	{
-		m_tank.setFillColor(sf::Color::Red);
-	}
-	else {
-		m_tank.setTexture(&m_tank_texture);
-	}
 }
 
 void Tank::move_tank(movement_direction direction, float delta) {
 
-	switch (direction) {
-	case up:
-		m_direction = sf::Vector2f(0.f, -1.f);
-		rotate_tank(sf::degrees(0.f));
-		break;
-	case left:
-		m_direction = sf::Vector2f(-1.f, 0.f);
-		rotate_tank(sf::degrees(-90.f));
-		break;
-	case right:
-		m_direction = sf::Vector2f(1.f, 0.f);
-		rotate_tank(sf::degrees(90.f));
-		break;
-	case down:
-		m_direction = sf::Vector2f(0.f, 1.f);
-		rotate_tank(sf::degrees(180.f));
-		break;
-	case stop:
-		m_direction = sf::Vector2f(0.f, 0.f);		
-		break;
-	default:
-		// handle invalid status value
-		m_direction = sf::Vector2f(0.f, 0.f);
-		break;
-	}
-	
-	sf::Vector2f mtd(0.f, 0.f);
-	sf::Vector2f p0 = m_tank.getPosition();
-	sf::Vector2f vel = m_direction * m_move_speed;
-	sf::Vector2f p1 = p0 + (delta * vel);
+}
 
-	if (!g_Game->m_ai_tanks.empty()) {
+void Tank::hitByBullet()
+{
+	//kill_count();
 
-		for (int i = 0; i < g_Game->m_ai_tanks.size(); ++i) {
-			mtd = g_Game->separating_axis(g_Game->m_ai_tanks[i], g_Game->m_player_tank, p1);
-			p1 = p1 + mtd;
-			g_Game->calibrate_pos(p1);
-			m_tank.setPosition(p1);
-		}
+	// Notify all observers
+	for (Observer* observer : observers) {
+		observer->onTankHit(this);
 	}
-	else {
-		p1 = p1 + mtd;
-		g_Game->calibrate_pos(p1);
-		m_tank.setPosition(p1);
-	}
+}
 
-	//std::cout << p1.x << ";" << p1.y << std::endl;
+void Tank::addObserver(Observer* observer)
+{
+	// Add to vector
+	observers.push_back(observer);
+}
+
+void Tank::removeObserver(Observer* observer)
+{
+	// Remove from vector
+	observers.pop_back();
 }
 
 void Tank::rotate_tank(sf::Angle angle)
@@ -103,15 +71,20 @@ const sf::Angle Tank::getRotation() const
 	return m_tank.getRotation();
 }
 
-const sf::Vector2f& Tank::get_direction() const
-{
-	return m_direction;
-}
-
 const sf::Vector2f Tank::get_size() const
 {
 	sf::Vector2f tank_size = m_tank.getSize();
 	return tank_size;
+}
+
+float Tank::get_speed()
+{
+	return m_move_speed;
+}
+
+void Tank::modify_speed(float speed_boost)
+{
+	m_move_speed += speed_boost;
 }
 
 const sf::RectangleShape Tank::get_shape() const
@@ -120,51 +93,83 @@ const sf::RectangleShape Tank::get_shape() const
 	return tank_shape;
 }
 
-const uint32_t Tank::get_team_id() const
+void Tank::modify_life(unsigned int life_boost)
 {
-	return m_team_id;
+	m_life += life_boost;
 }
 
+void Tank::kill_count()
+{
+	m_kills_count += 1;
+}
 
+bool Tank::if_first_bullet_shot()
+{
+	return false;
+}
+
+void Tank::first_bullet_shot()
+{
+
+}
+
+void Tank::last_projectile_shot_time(std::chrono::duration<float> time)
+{
+}
+
+std::chrono::duration<float> Tank::when_last_projectile_shot()
+{
+	return m_last_projectile_shot_time;
+}
 
 Tank& Tank::operator=(Tank& other)
 {
 	m_tank = other.m_tank;
+	m_life = other.m_life;
 	m_health = other.m_health;
 	m_damage = other.m_damage;
 	m_move_speed = other.m_move_speed;
 	m_team_id = other.m_team_id;
 	m_tank_attack_type = other.m_tank_attack_type;
+	m_tankTexture = other.m_tankTexture;
 	return *this;
 }
 
 Tank::Tank(const Tank& other)
 {
 	m_tank = other.m_tank;
+	m_life = other.m_life;
 	m_health = other.m_health;
 	m_damage = other.m_damage;
 	m_move_speed = other.m_move_speed;
 	m_team_id = other.m_team_id;
-	m_tank_attack_type = other.m_tank_attack_type;
+	m_tank_attack_type = other.m_tank_attack_type;	
+	m_tankTexture = other.m_tankTexture;
 }
 
 Tank& Tank::operator=(Tank&& other) noexcept
 {
 	std::swap(m_tank, other.m_tank);
+	std::swap(m_life, other.m_life);
 	std::swap(m_health, other.m_health);
 	std::swap(m_damage, other.m_damage);
 	std::swap(m_move_speed, other.m_move_speed);
 	std::swap(m_team_id, other.m_team_id);
 	std::swap(m_tank_attack_type, other.m_tank_attack_type);
+	std::swap(m_tankTexture, other.m_tankTexture);
 	return *this;
 }
 
 Tank::Tank(Tank&& other) noexcept
 {
 	std::swap(m_tank, other.m_tank);
+	std::swap(m_life, other.m_life);
 	std::swap(m_health, other.m_health);
 	std::swap(m_damage, other.m_damage);
 	std::swap(m_move_speed, other.m_move_speed);
 	std::swap(m_team_id, other.m_team_id);
 	std::swap(m_tank_attack_type, other.m_tank_attack_type);
+	std::swap(m_tankTexture, other.m_tankTexture);
 }
+
+

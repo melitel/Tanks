@@ -11,9 +11,12 @@ public:
 	void initialize(const sf::Vector2f& pos);
 	void draw(std::unique_ptr<sf::RenderWindow>& window);
 	void update(float delta);
+	void move_projectile(float delta);
 	float distance_update(float delta);
+	float get_projectile_distance();
 	sf::FloatRect get_projectile_bounds();
 	uint32_t get_owner_team_id();
+	const sf::Vector2f get_position() const;
 
 	Projectile(Tank* owner);
 

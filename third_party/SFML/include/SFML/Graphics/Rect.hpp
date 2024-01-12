@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2022 Laurent Gomila (laurent@sfml-dev.org)
+// Copyright (C) 2007-2023 Laurent Gomila (laurent@sfml-dev.org)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -22,8 +22,7 @@
 //
 ////////////////////////////////////////////////////////////
 
-#ifndef SFML_RECT_HPP
-#define SFML_RECT_HPP
+#pragma once
 
 ////////////////////////////////////////////////////////////
 // Headers
@@ -47,7 +46,7 @@ public:
     /// \brief Default constructor
     ///
     /// Creates an empty rectangle (it is equivalent to calling
-    /// Rect(0, 0, 0, 0)).
+    /// Rect({0, 0}, {0, 0})).
     ///
     ////////////////////////////////////////////////////////////
     constexpr Rect();
@@ -110,7 +109,7 @@ public:
     ///
     /// \return Position of rectangle
     ///
-    /// \see getSize
+    /// \see getSize, getCenter
     ///
     ////////////////////////////////////////////////////////////
     constexpr Vector2<T> getPosition() const;
@@ -120,18 +119,28 @@ public:
     ///
     /// \return Size of rectangle
     ///
-    /// \see getPosition
+    /// \see getPosition, getCenter
     ///
     ////////////////////////////////////////////////////////////
     constexpr Vector2<T> getSize() const;
 
     ////////////////////////////////////////////////////////////
+    /// \brief Get the position of the center of the rectangle
+    ///
+    /// \return Center of rectangle
+    ///
+    /// \see getSize, getPosition
+    ///
+    ////////////////////////////////////////////////////////////
+    constexpr Vector2<T> getCenter() const;
+
+    ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-    T left;   //!< Left coordinate of the rectangle
-    T top;    //!< Top coordinate of the rectangle
-    T width;  //!< Width of the rectangle
-    T height; //!< Height of the rectangle
+    T left{};   //!< Left coordinate of the rectangle
+    T top{};    //!< Top coordinate of the rectangle
+    T width{};  //!< Width of the rectangle
+    T height{}; //!< Height of the rectangle
 };
 
 ////////////////////////////////////////////////////////////
@@ -173,9 +182,6 @@ using FloatRect = Rect<float>;
 } // namespace sf
 
 
-#endif // SFML_RECT_HPP
-
-
 ////////////////////////////////////////////////////////////
 /// \class sf::Rect
 /// \ingroup graphics
@@ -195,7 +201,7 @@ using FloatRect = Rect<float>;
 /// \li The left and top edges are included in the rectangle's area
 /// \li The right (left + width) and bottom (top + height) edges are excluded from the rectangle's area
 ///
-/// This means that sf::IntRect(0, 0, 1, 1) and sf::IntRect(1, 1, 1, 1)
+/// This means that sf::IntRect({0, 0}, {1, 1}) and sf::IntRect({1, 1}, {1, 1})
 /// don't intersect.
 ///
 /// sf::Rect is a template and may be used with any numeric type, but
@@ -208,7 +214,7 @@ using FloatRect = Rect<float>;
 /// Usage example:
 /// \code
 /// // Define a rectangle, located at (0, 0) with a size of 20x5
-/// sf::IntRect r1(0, 0, 20, 5);
+/// sf::IntRect r1({0, 0}, {20, 5});
 ///
 /// // Define another rectangle, located at (4, 2) with a size of 18x10
 /// sf::Vector2i position(4, 2);
@@ -216,8 +222,8 @@ using FloatRect = Rect<float>;
 /// sf::IntRect r2(position, size);
 ///
 /// // Test intersections with the point (3, 1)
-/// bool b1 = r1.contains(3, 1); // true
-/// bool b2 = r2.contains(3, 1); // false
+/// bool b1 = r1.contains({3, 1}); // true
+/// bool b2 = r2.contains({3, 1}); // false
 ///
 /// // Test the intersection between r1 and r2
 /// std::optional<sf::IntRect> result = r1.findIntersection(r2);

@@ -6,11 +6,6 @@ class Tile
 {
 public:
 
-	void update(float dt);
-	int get_id();
-	bool get_walkable();
-	bool get_visible();
-
 	Tile (
 		int tileID,
 		bool destroyable,
@@ -30,6 +25,12 @@ public:
 		m_view_through(view_through),
 		m_move_speed_modificator(move_speed_modificator)
 	{}
+
+	void update(float dt);
+	int get_id();
+	bool get_walkable();
+	bool get_visible();
+	bool get_pierceable();
 
 protected:
 

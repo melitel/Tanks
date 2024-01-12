@@ -1,21 +1,23 @@
 #include "Game.h"
+#include "FireCommand.h"
+#include <sstream>
 
 Game* g_Game = nullptr;
+PowerUp* m_life_boost = new LifeBoostPowerUp();
+PowerUp* m_speed_boost = new SpeedBoostPowerUp();
 
-void Game::initialize(uint32_t window_width, uint32_t window_height, std::unique_ptr<sf::RenderWindow> &window)
+void Game::initialize(uint32_t window_width, uint32_t window_height)
 {
-	m_input_state.fill(false);
-	m_first_bullet_shot = false;
-	m_kills_count = 0;
-
-	m_ai_tanks.push_back(AiTank(10, 1, 60.f, 0, AiTank::attack));
-	m_ai_tanks.push_back(AiTank(10, 1, 60.f, 0, AiTank::defence));
-	
-	m_game_win_width = window_width;
-	m_game_win_height = window_height;
-	m_map = std::make_unique<TileMap>();
 	m_game_state = gs_menu;
 
+	m_game_win_width = window_width;
+	m_game_win_height = window_height;
+
+	initialize_game_menu(window_width, window_height);
+}
+
+void Game::initialize_game_menu(uint32_t window_width, uint32_t window_height)
+{	
 	m_menu_background.setSize(sf::Vector2f((float)m_game_win_width, (float)m_game_win_height));
 	m_menu_background.setPosition(sf::Vector2f(0.f, 0.f));
 	if (!m_background_tex.loadFromFile("background.jpg"))
@@ -24,18 +26,21 @@ void Game::initialize(uint32_t window_width, uint32_t window_height, std::unique
 	}
 	m_menu_background.setTexture(&m_background_tex);
 
-	m_game_background.setSize(sf::Vector2f((float)m_game_win_width, (float)m_game_win_height));
-	m_game_background.setPosition(sf::Vector2f(0.f, 0.f));
-	m_game_background.setFillColor(sf::Color::Yellow);
-
 	m_start_button.setSize(sf::Vector2f(225.f, 90.f));
 	m_start_button.setPosition(sf::Vector2f(310.f, 200.f));
 	if (!m_start_button_tex.loadFromFile("startbutton.png"))
 	{
 		std::cout << "Error";
 	}
-	m_start_button.setTexture(&m_start_button_tex);		
+	m_start_button.setTexture(&m_start_button_tex);
+}
 
+void Game::initialize_game_start(uint32_t window_width, uint32_t window_height)
+{		
+	m_input_state.fill(false);
+	m_boosts.clear();
+	m_ai_tanks.clear();
+	m_map = std::make_unique<TileMap>();
 	m_map->read_level_from_file("level.txt");
 
 	if (!m_map->load("tileset.png"))
@@ -43,21 +48,70 @@ void Game::initialize(uint32_t window_width, uint32_t window_height, std::unique
 		std::cout << "Error";
 	}
 
-	m_player_tank.initialize(sf::Vector2f(432.f, 560.f), "commontankup.png");
-
-	for (int i = 0; i < m_ai_tanks.size(); ++i) {		
-		m_ai_tanks[i].initialize(m_ai_spawn_pos[0], "aitank.png");
+	if (!m_game_font.loadFromFile("arial.ttf"))
+	{
+		//error::
 	}
-	m_player_base.initialize(sf::Vector2f(432.f, 560.f), "base.png");
-	m_ai_base.initialize(sf::Vector2f(432.f, 48.f), "base.png");
+
+	m_player_tank.initialize(sf::Vector2f(432.f, 592.f));
+
+	// Attach observers to the tank
+	m_player_tank.addObserver(&audioObserver);
+	m_player_tank.addObserver(&animationObserver);
+
+	m_ai_tanks.push_back(AiTank("aitank.png", 1, 10, 1, 60.f, 0, AiTank::attack));
+	m_ai_tanks.back().initialize(m_ai_spawn_pos[1]);
+	m_ai_tanks.push_back(AiTank("aitank.png", 1, 10, 1, 60.f, 0, AiTank::defence));
+	m_ai_tanks.back().initialize(m_ai_spawn_pos[0]);
+
+	m_game_background.setSize(sf::Vector2f((float)m_game_win_width, (float)m_game_win_height));
+	m_game_background.setPosition(sf::Vector2f(0.f, 0.f));
+	m_game_background.setFillColor(sf::Color::Yellow);
+	
+	m_player_life.setSize(sf::Vector2f(32.f, 32.f));
+	m_player_life.setPosition(sf::Vector2f(32.f, 0.f));
+
+	if (!m_life_texture.loadFromFile("heart.png"))
+	{
+		std::cout << "Error";
+	}
+	m_player_life.setTexture(&m_life_texture);
+
+	m_life_text.setCharacterSize(25);
+	m_life_text.setFillColor(sf::Color::White);
+	m_life_text.setPosition(sf::Vector2f(70.f, 0.f));
+
+	uint32_t player_life_count = m_player_tank.get_life();
+	// Convert integer to string
+	std::stringstream pl;
+	pl << player_life_count;
+	std::string playerLifeCountString = pl.str();
+
+	m_life_text.setString(playerLifeCountString);
+	m_life_text.setFont(m_game_font);
+
+	m_kill_count_icon.setSize(sf::Vector2f(32.f, 32.f));
+	m_kill_count_icon.setPosition(sf::Vector2f(760.f, 0.f));
+	if (!m_kill_count_texture.loadFromFile("killcount.png"))
+	{
+		std::cout << "Error";
+	}
+	m_kill_count_icon.setTexture(&m_kill_count_texture);
+	m_kill_count_text.setCharacterSize(25);
+	m_kill_count_text.setFillColor(sf::Color::White);
+	m_kill_count_text.setPosition(sf::Vector2f(800.f, 0.f));
+	m_kill_count_text.setString("0");
+	m_kill_count_text.setFont(m_game_font);		
+
+	/*for (int i = 0; i < m_ai_tanks.size(); ++i) {		
+		m_ai_tanks[i].initialize(m_ai_spawn_pos[0]);
+	}*/
+	m_player_base.initialize(sf::Vector2f(432.f, 592.f), "base.png");
+	m_ai_base.initialize(sf::Vector2f(432.f, 80.f), "base.png");
 	m_player_base.rotate_base(sf::degrees(180.f));	
 	
 	g_Game = this;
 }
-
-int first_button_index = -2;
-int second_button_index = -2;
-int third_button_index = -2;
 
 void Game::update()
 {
@@ -65,245 +119,198 @@ void Game::update()
 	m_dt = t - m_time;
 	m_time = t;
 	m_total_time = t - m_start_time;
-	float delta = std::min(m_dt.count(), 1.f / 30.f);
+	float delta = std::min(m_dt.count(), 1.f / 30.f);	
+	int total_time_seconds = std::chrono::duration_cast<std::chrono::seconds>(m_total_time).count();
+
+	sf::FloatRect ai_base_bounds = m_ai_base.get_bounds();
+	sf::Vector2f ai_base_position = m_ai_base.get_position();
+
+	sf::FloatRect player_tank_bounds = m_player_tank.get_tank_bounds();
+	sf::Vector2f player_tank_position = m_player_tank.get_position();
+
+	sf::FloatRect player_base_bounds = m_player_base.get_bounds();
+	sf::Vector2f player_base_position = m_player_base.get_position();
 
 	if (m_game_state == game_state::gs_game_start) {
+
+		m_player_tank.update(delta, 0);		
 
 		if (!m_ai_tanks.empty()) {
 			for (int i = 0; i < m_ai_tanks.size(); ++i) {
 				m_ai_tanks[i].update(delta, i);
-			}					
-		}
-	}	
-
-	int inputs_count = count_inputs(m_input_state);	
-
-	if (inputs_count == 0)
-	{
-		first_button_index = -2;
-	}
-	if (inputs_count == 1) {
-		
-		second_button_index = -2;
-		
-		if (m_input_state[input_event::keyboard_event::k_W] == true) 
-		{
-			first_button_index = 0;			
-			m_player_tank.move_tank(ControllableTank::movement_direction::up, delta);
-		}
-		if (m_input_state[input_event::keyboard_event::k_A] == true)
-		{
-			first_button_index = 1;			
-			m_player_tank.move_tank(ControllableTank::movement_direction::left, delta);
-		}
-		if (m_input_state[input_event::keyboard_event::k_S] == true)
-		{
-			first_button_index = 2;			
-			m_player_tank.move_tank(ControllableTank::movement_direction::down, delta);
-		}
-		if (m_input_state[input_event::keyboard_event::k_D] == true)
-		{
-			first_button_index = 3;
-			m_player_tank.move_tank(ControllableTank::movement_direction::right, delta);
-
-		}
-	}
-	if (inputs_count == 2) {
-
-		int true_found = -1;
-		int action_to_do = -1;
-
-		if (first_button_index >= 0 && second_button_index >= 0 && third_button_index >= 0)
-		{
-			if (!m_input_state[first_button_index])
-			{
-				first_button_index = second_button_index;
-				second_button_index = third_button_index;
-				third_button_index = -2;
-				action_to_do = second_button_index;
 			}
-			else if (!m_input_state[second_button_index])
-			{
-				second_button_index = third_button_index;
-				third_button_index = -2;
-				action_to_do = second_button_index;
-			}
-			else if (!m_input_state[third_button_index])
-			{
-				third_button_index = -2;
-				action_to_do = second_button_index;
-			}
+		}
+
+		if (total_time_seconds % 10 == 0 && m_boosts.empty() && total_time_seconds != 0) {
 			
-		}
-		else 
-		{
-			for (int i = 0; i < m_input_state.size(); ++i)
-			{
-				if (m_input_state[i])
-				{
-					true_found = i;
+			int x = std::rand() % 101;
 
-					if (true_found != first_button_index) {
-						action_to_do = true_found;
-						second_button_index = action_to_do;
-
-					}
-				}
-			}
-		}		
-
-		if (action_to_do == 0) 
-		{			
-			m_player_tank.move_tank(ControllableTank::movement_direction::up, delta);			
-		}
-		if (action_to_do == 1)
-		{				
-			m_player_tank.move_tank(ControllableTank::movement_direction::left, delta);
-		}
-		if (action_to_do == 2)
-		{				
-			m_player_tank.move_tank(ControllableTank::movement_direction::down, delta);
-		}
-		if (action_to_do == 3)
-		{				
-			m_player_tank.move_tank(ControllableTank::movement_direction::right, delta);
-		}
-		
-	}
-	if (inputs_count > 2) {
-
-		int true_found = -1;
-
-		for (int i = 0; i < m_input_state.size(); ++i)
-		{
-			if (m_input_state[i])
-			{
-				true_found = i;
-
-				if (true_found != first_button_index && true_found != second_button_index) {
-					
-					third_button_index = true_found;
-				}
-			}
-		}
-
-		//change button index to 2nd button pressed, so when 3d button released to continue moving in second button direction
-		m_player_tank.move_tank(ControllableTank::movement_direction::stop, delta);
-	}	
-	
-	if (!m_projectile_vector.empty())
-	{
-		m_projectile_distance = 64;
-
-		for (int i = 0; i < m_projectile_vector.size(); i++)
-		{
-			Projectile& proj = m_projectile_vector[i];
-			uint32_t proj_owner_team_id = proj.get_owner_team_id();
-
-			if (proj_owner_team_id == 1) {
-				proj.update(delta);
-				m_projectile_distance = proj.distance_update(delta);
+			if (x % 2 == 0) {
+				sf::Vector2f position = random_spawn_point();
+				m_boosts.push_back(BoostSprite("speedboost.png", 2, position));
+				m_boost_spawn_time = m_total_time;
 			}
 			else {
-				proj.update(delta);
-				m_projectile_distance = proj.distance_update(delta);
+				sf::Vector2f position = random_spawn_point();
+				m_boosts.push_back(BoostSprite("heart.png", 1, position));
+				m_boost_spawn_time = m_total_time;
+			}		
+		}
+		if ((m_total_time - m_boost_spawn_time) >= std::chrono::seconds{ 5 }) {
+			m_boosts.clear();
+		}
+
+		if (!m_boosts.empty()) {
+			sf::FloatRect boost_bounds = m_boosts[0].get_bounds();
+			uint32_t boost_id = m_boosts[0].get_boost_id();
+		
+			if (player_tank_bounds.findIntersection(boost_bounds) && boost_id == 1) {
+				m_life_boost->activate(&m_player_tank);
+				uint32_t player_life = m_player_tank.get_life();
+				// Convert integer to string
+				std::stringstream pl;
+				pl << player_life;
+				std::string playerLifeString = pl.str();
+				m_life_text.setString(playerLifeString);
+				m_boosts.clear();
 			}
-			
-			sf::FloatRect projectile_bounds = m_projectile_vector[i].get_projectile_bounds();
-			sf::FloatRect first_ai_tank_bounds = m_ai_tanks[0].get_tank_bounds();
-			sf::Vector2f first_ai_tank_position = m_ai_tanks[0].get_position();
-			sf::FloatRect second_ai_tank_bounds = m_ai_tanks[1].get_tank_bounds();
-			sf::Vector2f second_ai_tank_position = m_ai_tanks[1].get_position();
-
-			sf::FloatRect ai_base_bounds = m_ai_base.get_bounds();
-			sf::Vector2f ai_base_position = m_ai_base.get_position();
-
-			sf::FloatRect player_tank_bounds = m_player_tank.get_tank_bounds();
-			sf::Vector2f player_tank_position = m_player_tank.get_position();
-
-			sf::FloatRect player_base_bounds = m_player_base.get_bounds();
-			sf::Vector2f player_base_position = m_player_base.get_position();
-			
-			if (m_projectile_distance <= 0)
-			{
-				std::swap(proj, m_projectile_vector.back());				
-				m_projectile_vector.pop_back();
+			if (player_tank_bounds.findIntersection(boost_bounds) && boost_id == 2) {
+				m_speed_boost->activate(&m_player_tank);
+				m_boosts.clear();
 			}
+		}
+	}
+	if (m_game_state == gs_win) {
 
-			if (projectile_bounds.findIntersection(first_ai_tank_bounds) && proj_owner_team_id == 1) {
+		m_win_lose_text.setCharacterSize(75);
+		m_win_lose_text.setFillColor(sf::Color::Black);
+		m_win_lose_text.setPosition(sf::Vector2f(260.f, 150.f));
+		m_win_lose_text.setString("You Won!");
+		m_win_lose_text.setFont(m_game_font);
 
-				m_animation.play(0, sf::Vector2f(first_ai_tank_position.x - m_tank_offset, first_ai_tank_position.y - m_tank_offset), "explosioneffect.png");
-				std::swap(proj, m_projectile_vector.back());
-				m_projectile_vector.pop_back();
-				m_kills_count += 1;
+		m_replay_button.setSize(sf::Vector2f(225.f, 70.f));
+		m_replay_button.setPosition(sf::Vector2f(310.f, 270.f));
+		m_replay_button_tex = &TextureManager::GetTexture("replaybutton.png");
+		m_replay_button.setTexture(m_replay_button_tex);
+	}
 
-				if (m_kills_count < 5) {
+	if (m_game_state == gs_lose) {
+		m_win_lose_text.setCharacterSize(75);
+		m_win_lose_text.setFillColor(sf::Color::Black);
+		m_win_lose_text.setPosition(sf::Vector2f(260.f, 150.f));
+		m_win_lose_text.setString("You Lose!");
+		m_win_lose_text.setFont(m_game_font);
 
-					if (m_ai_tanks[0].m_tank_attack_type == AiTank::defence) {
-						m_ai_tanks.erase(m_ai_tanks.begin());
-						m_ai_tanks.push_back(AiTank(10, 1, 60.f, 0, AiTank::defence));
-						m_ai_tanks.back().initialize(m_ai_spawn_pos[0], "aitank.png");
+		m_replay_button.setSize(sf::Vector2f(225.f, 70.f));
+		m_replay_button.setPosition(sf::Vector2f(310.f, 270.f));
+		m_replay_button_tex = &TextureManager::GetTexture("replaybutton.png");
+		m_replay_button.setTexture(m_replay_button_tex);
+	}
+
+	for (int j = 0; j < m_commands.size(); ++j) {
+	
+		m_commands[j]->execute();
+	}
+
+	m_commands.clear();
+
+	for (int i = 0; i < m_projectile_vector.size(); i++)
+	{
+		Projectile& proj = m_projectile_vector[i];
+		uint32_t proj_owner_team_id = proj.get_owner_team_id();
+		float projectile_distance = proj.get_projectile_distance();
+
+		sf::FloatRect projectile_bounds = m_projectile_vector[i].get_projectile_bounds();		
+
+		calibrate_projectile(proj);
+
+		if (proj_owner_team_id == 1) {
+			proj.update(delta);
+			projectile_distance = proj.distance_update(delta);
+		}
+		else {
+			proj.update(delta);
+			projectile_distance = proj.distance_update(delta);
+		}
+
+		if (projectile_distance <= 0)
+		{
+			delete_projectile(proj);
+		}
+
+		for (int j = 0; j < m_ai_tanks.size(); j++) {
+
+			sf::FloatRect ai_tank_bounds = m_ai_tanks[j].get_tank_bounds();
+			sf::Vector2f ai_tank_position = m_ai_tanks[j].get_position();			
+
+			if (projectile_bounds.findIntersection(ai_tank_bounds) && proj_owner_team_id == 1) {
+
+				m_animation.play(0, sf::Vector2f(ai_tank_position.x - m_tank_offset, ai_tank_position.y - m_tank_offset), "explosioneffect.png");
+				delete_projectile(proj);
+				m_player_tank.kill_count();
+
+				uint32_t kills_count = m_player_tank.get_kill_count();
+
+				// Convert integer to string
+				std::stringstream ss;
+				ss << kills_count;
+				std::string killCountString = ss.str();
+								
+				m_kill_count_text.setString(killCountString);
+
+				if (kills_count < 5) {
+
+					if (m_ai_tanks[j].m_tank_attack_type == AiTank::defence) {
+						m_ai_tanks.erase(m_ai_tanks.begin() + j);
+						m_ai_tanks.push_back(AiTank("aitank.png", 1, 10, 1, 60.f, 0, AiTank::defence));
+						m_ai_tanks.back().initialize(m_ai_spawn_pos[0]);
 					}
 					else {
-						m_ai_tanks.erase(m_ai_tanks.begin());
-						m_ai_tanks.push_back(AiTank(10, 1, 60.f, 0, AiTank::attack));
-						int position = rand() % 3;
-						m_ai_tanks.back().initialize(m_ai_spawn_pos[position], "aitank.png");
+						m_ai_tanks.erase(m_ai_tanks.begin() + j);
+						m_ai_tanks.push_back(AiTank("aitank.png", 1, 10, 1, 60.f, 0, AiTank::attack));						
+						sf::Vector2f position = random_spawn_point();
+						m_ai_tanks.back().initialize(sf::Vector2f(position.x + m_tank_offset, position.y + m_tank_offset));
 					}
 				}
 				else {
-					m_ai_tanks.erase(m_ai_tanks.begin());
+					m_ai_tanks.erase(m_ai_tanks.begin() + j);
 				}
 			}
+		}
 
-			if (projectile_bounds.findIntersection(second_ai_tank_bounds) && proj_owner_team_id == 1) {
-
-				m_animation.play(0, sf::Vector2f(second_ai_tank_position.x - m_tank_offset, second_ai_tank_position.y - m_tank_offset), "explosioneffect.png");
-				std::swap(proj, m_projectile_vector.back());
-				m_projectile_vector.pop_back();
-				m_kills_count += 1;
-
-				if (m_kills_count < 5) {
-
-					if (m_ai_tanks[1].m_tank_attack_type == AiTank::defence) {
-						m_ai_tanks.erase(m_ai_tanks.end());
-						m_ai_tanks.push_back(AiTank(10, 1, 60.f, 0, AiTank::defence));
-						m_ai_tanks.back().initialize(m_ai_spawn_pos[0], "aitank.png");
-					}
-					else {
-						m_ai_tanks.erase(m_ai_tanks.end());
-						m_ai_tanks.push_back(AiTank(10, 1, 60.f, 0, AiTank::attack));
-						int position = rand() % 3;
-						m_ai_tanks.back().initialize(m_ai_spawn_pos[position], "aitank.png");
-					}
-				}
-				else {
-					m_ai_tanks.erase(m_ai_tanks.end());
-				}
+		if (projectile_bounds.findIntersection(ai_base_bounds) && proj_owner_team_id == 1) {
+			m_animation.play(0, sf::Vector2f(ai_base_position.x - m_base_offset_x, ai_base_position.y - m_base_offset_y), "explosioneffect.png");
+			m_ai_base.modify_life(-1);
+			int ai_base_hp = m_ai_base.get_life();
+			delete_projectile(proj);
+			if (ai_base_hp == 0) {
+				m_game_state = gs_win;
 			}
-
-			if (projectile_bounds.findIntersection(ai_base_bounds) && proj_owner_team_id == 1) {
-
-				m_animation.play(0, sf::Vector2f(ai_base_position.x - m_base_offset_x, ai_base_position.y - m_base_offset_y), "explosioneffect.png");
-				std::swap(proj, m_projectile_vector.back());
-				m_projectile_vector.pop_back();
-				
+		}
+		if (projectile_bounds.findIntersection(player_tank_bounds) && proj_owner_team_id == 0) {
+			m_player_tank.hitByBullet();
+			//m_animation.play(0, sf::Vector2f(player_tank_position.x - m_tank_offset, player_tank_position.y - m_tank_offset), "explosioneffect.png");
+			m_player_tank.modify_life(-1);
+			uint32_t player_life = m_player_tank.get_life();
+			// Convert integer to string
+			std::stringstream pl;
+			pl << player_life;
+			std::string playerLifeString = pl.str();
+			m_life_text.setString(playerLifeString);
+			delete_projectile(proj);
+			if (player_life == 0) {
+				m_game_state = gs_lose;
 			}
-			if (projectile_bounds.findIntersection(player_tank_bounds) && proj_owner_team_id == 0) {
-
-				m_animation.play(0, sf::Vector2f(player_tank_position.x - m_tank_offset, player_tank_position.y - m_tank_offset), "explosioneffect.png");
-				std::swap(proj, m_projectile_vector.back());
-				m_projectile_vector.pop_back();
-
+		}
+		if (projectile_bounds.findIntersection(player_base_bounds) && proj_owner_team_id == 0) {
+			m_animation.play(0, sf::Vector2f(player_base_position.x - m_base_offset_x, player_base_position.y - m_base_offset_y), "explosioneffect.png");
+			m_player_base.modify_life(-1);
+			int player_base_hp = m_player_base.get_life();
+			delete_projectile(proj);
+			if (player_base_hp == 0) {
+				m_game_state = gs_lose;
 			}
-			if (projectile_bounds.findIntersection(player_base_bounds) && proj_owner_team_id == 0) {
-
-				m_animation.play(0, sf::Vector2f(player_base_position.x - m_base_offset_x, player_base_position.y - m_base_offset_y), "explosioneffect.png");
-				std::swap(proj, m_projectile_vector.back());
-				m_projectile_vector.pop_back();
-
-			}						
-		}		
+		}
 	}
 
 	m_animation.update(delta);
@@ -319,8 +326,19 @@ void Game::draw(std::unique_ptr<sf::RenderWindow>& window)
 		window->draw(m_start_button);
 	}
 	if (m_game_state == game_state::gs_game_start)
-	{			
-		window->draw(*m_map);		
+	{	
+		window->draw(*m_map);
+		window->draw(m_player_life);
+		window->draw(m_kill_count_icon);
+		window->draw(m_kill_count_text);
+		window->draw(m_life_text);
+		if (!m_boosts.empty())
+		{
+			for (int j = 0; j < m_boosts.size(); ++j)
+			{
+				m_boosts[j].draw(window);
+			}
+		}
 		m_player_base.draw(window);
 		m_ai_base.draw(window);
 		m_player_tank.draw(window);
@@ -329,7 +347,12 @@ void Game::draw(std::unique_ptr<sf::RenderWindow>& window)
 				m_ai_tanks[i].draw(window);
 			}			
 		}
-		m_animation.draw(window);
+		m_animation.draw(window);		
+	}
+	if (m_game_state == gs_win || m_game_state == gs_lose) {
+		window->draw(m_menu_background);
+		window->draw(m_win_lose_text);
+		window->draw(m_replay_button);
 	}
 
 	if (!m_projectile_vector.empty())
@@ -341,87 +364,74 @@ void Game::draw(std::unique_ptr<sf::RenderWindow>& window)
 	}
 
 	window->display();
-
 }
 
-void Game::gather_input(input_event events)
-{	
+void Game::process_input()
+{
+	InputEvent event;
 	sf::FloatRect start_bounds = m_start_button.getGlobalBounds();
-	
-	if (!events.mouse_events.empty() && m_game_state == gs_menu)
-	{
-		for (int i = 0; i < events.mouse_events.size(); ++i)
-		{
-			if (events.mouse_events[i].left_button_pressed)
-			{
-				if (start_bounds.contains((sf::Vector2f)(events.mouse_events[i].position)))
-				{
-					m_game_state = gs_game_start;
-				}
-			}
-		}
-	}
-	
+	sf::FloatRect replay_bounds = m_replay_button.getGlobalBounds();
 
-	if (!events.keyboard_events.empty() && m_game_state == gs_game_start)
-	{		
+	// Process the event queue
+	while (m_event_queue.hasEvents()) {
 
-		for (int i = 0; i < events.keyboard_events.size(); ++i)
-		{
-			if (events.keyboard_events[i].isPressed && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_W)
-			{				
-				m_input_state[input_event::keyboard_event::k_W] = true;			
-			}
-			if (events.keyboard_events[i].isPressed && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_D)
-			{
-				m_input_state[input_event::keyboard_event::k_D] = true;
-			}
-			if (events.keyboard_events[i].isPressed && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_A)
-			{
-				m_input_state[input_event::keyboard_event::k_A] = true;
-			}
-			if (events.keyboard_events[i].isPressed && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_S)
-			{
-				m_input_state[input_event::keyboard_event::k_S] = true;
-			}
-			if (events.keyboard_events[i].isPressed && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_Space)
-			{
-				Projectile projectile(&m_player_tank);
+		event = m_event_queue.popEvent();
 
-				if (!m_first_bullet_shot) {
-					m_first_bullet_shot = true;					
-					m_last_projectile_shot = m_total_time;
-					
-					m_projectile_vector.push_back(std::move(projectile));
+		switch (event.type) {
+		case InputEvent::Type::MouseClick:
+			// ... Handle mouse click event ...
+			if (start_bounds.contains(sf::Vector2f(event.position)))
+			{
+				m_game_state = gs_game_start;
+				initialize_game_start(m_game_win_width, m_game_win_height);
+			}
+			if (replay_bounds.contains(sf::Vector2f(event.position)))
+			{
+				m_game_state = gs_menu;	
+				initialize_game_menu(m_game_win_width, m_game_win_height);
+			}
+			break;
+		case InputEvent::Type::ButtonClick:
+			// ... Handle key pressed event ...
+			if (event.buttonType == 0) {
+				if (event.buttonPressed == true) {
+					m_input_state[input_event::keyboard_event::k_W] = true;
 				}
 				else {
-					if ((m_total_time - m_last_projectile_shot) >= std::chrono::seconds{ 3 }) {
+					m_input_state[input_event::keyboard_event::k_W] = false;
+				}
+			}
+			if (event.buttonType == 1) {
+				if (event.buttonPressed == true) {
+					m_input_state[input_event::keyboard_event::k_A] = true;
+				}
+				else {
+					m_input_state[input_event::keyboard_event::k_A] = false;
+				}
+			}
+			if (event.buttonType == 2) {
+				if (event.buttonPressed == true) {
+					m_input_state[input_event::keyboard_event::k_S] = true;
+				}
+				else {
+					m_input_state[input_event::keyboard_event::k_S] = false;
+				}
+			}
+			if (event.buttonType == 3) {
+				if (event.buttonPressed == true) {
+					m_input_state[input_event::keyboard_event::k_D] = true;
+				}
+				else {
+					m_input_state[input_event::keyboard_event::k_D] = false;
+				}
+			}
+			if (event.buttonType == 4) {
+				Command* command;
+				command = new FireCommand;
+				m_commands.push_back(command);
+			}
 
-						m_last_projectile_shot = m_total_time;
-						m_projectile_vector.push_back(std::move(projectile));					
-					}				
-				}				
-			}
-			if (events.keyboard_events[i].isReleased && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_W)
-			{
-				m_input_state[input_event::keyboard_event::k_W] = false;
-			}
-			if (events.keyboard_events[i].isReleased && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_A)
-			{
-				m_input_state[input_event::keyboard_event::k_A] = false;
-			}
-			if (events.keyboard_events[i].isReleased && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_S)
-			{
-				m_input_state[input_event::keyboard_event::k_S] = false;
-			}
-			if (events.keyboard_events[i].isReleased && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_D)
-			{
-				m_input_state[input_event::keyboard_event::k_D] = false;
-			}
-			if (events.keyboard_events[i].isReleased && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_Space)
-			{
-				m_input_state[input_event::keyboard_event::k_Space] = false;
-			}
+			break;		
 		}
 	}
 }
@@ -438,8 +448,7 @@ int Game::count_inputs(input_array inputs)
 			{
 				continue;
 			}
-			else {
-			
+			else {			
 				++numberOfTrue;
 			}
 		}
@@ -448,38 +457,61 @@ int Game::count_inputs(input_array inputs)
 	return numberOfTrue;
 }
 
+sf::Vector2f Game::random_spawn_point()
+{
+	sf::Vector2f spawn_point;
+
+	int maxAttempts = 100; // Maximum number of attempts to find a walkable tile
+	int attempt = 0;
+
+	float default_x = (13 * 32);
+	float default_y = (2 * 32);
+
+	sf::Vector2u tile_size = m_map->get_tile_size();
+
+	do {
+
+		int x = distx(gen);
+		int y = disty(gen);
+		
+		bool walkable = m_map->get_tile_walkable_by_indices(x, y);
+
+		if (walkable) {
+			spawn_point.x = x * tile_size.x; // Multiply by tile width to get the actual position
+			spawn_point.y = y * tile_size.y; // Multiply by tile height to get the actual position
+			spawn_point = sf::Vector2f(spawn_point.x, spawn_point.y);
+			break; // Found a walkable tile, exit the loop
+		}
+
+		attempt++;
+	} while (attempt < maxAttempts);
+
+	// If no walkable tile was found after the maximum number of attempts, spawn at a default position
+	if (attempt >= maxAttempts) {
+		spawn_point = sf::Vector2f(default_x, default_y); // Set the default spawn position
+	}
+
+	return spawn_point;
+}
+
+
 void Game::calibrate_pos(sf::Vector2f& tank_position)
 {		
-	bool tile_walkable = false;
-	sf::Vector2i tile_coordinates;	
 	sf::Vector2f tank_direction = m_player_tank.get_direction();
+	sf::Vector2i top_left_corner = m_map->get_tile_coordinates(int(tank_position.x - m_tank_offset), int(tank_position.y - m_tank_offset));
+	sf::Vector2i bot_right_corner = m_map->get_tile_coordinates(int(tank_position.x + m_tank_offset), int(tank_position.y + m_tank_offset));
+	sf::Vector2i top_right_corner = m_map->get_tile_coordinates(int(tank_position.x + m_tank_offset), int(tank_position.y - m_tank_offset));
+	sf::Vector2i bot_left_corner = m_map->get_tile_coordinates(int(tank_position.x - m_tank_offset), int(tank_position.y + m_tank_offset));
 
 	if (tank_direction == sf::Vector2f(0.f, -1.f))
 	{
 		if (tank_position.y < (0 + m_tank_offset))
 		{
-			tank_position.y = float (0 + (m_tank_offset + 1));
+			tank_position.y = float(0 + (m_tank_offset + 1));
 		}
 		else {
-
-			//checking top left corner coordinates position
-			tile_walkable = m_map->get_tile_walkable_by_coordinates(int (tank_position.x - m_tank_offset), int (tank_position.y - m_tank_offset));
-			tile_coordinates = m_map->get_tile_coordinates(int (tank_position.x - m_tank_offset), int (tank_position.y - m_tank_offset));
-
-			if (!tile_walkable)
-			{
-				tank_position.y = tile_coordinates.y * 32 + 32 + (m_tank_offset + 1);
-			}
-			else {
-				//checking top right corner coordinates position
-				tile_walkable = m_map->get_tile_walkable_by_coordinates(int (tank_position.x + m_tank_offset), int (tank_position.y - m_tank_offset));
-
-				if (!tile_walkable)
-				{
-					tank_position.y = tile_coordinates.y * 32 + 32 + (m_tank_offset + 1);
-				}
-			}		
-		}		
+			calibrate_position_moving_north_or_west(tank_position.y, top_left_corner, top_right_corner, top_left_corner.y);		
+		}
 	}
 	else if (tank_direction == sf::Vector2f(-1.f, 0.f))
 	{
@@ -488,80 +520,81 @@ void Game::calibrate_pos(sf::Vector2f& tank_position)
 			tank_position.x = float(0 + (m_tank_offset + 1));
 		}
 		else {
-		
-			//checking top left corner coordinates position
-			tile_walkable = m_map->get_tile_walkable_by_coordinates(int (tank_position.x - m_tank_offset), int (tank_position.y - m_tank_offset));
-			tile_coordinates = m_map->get_tile_coordinates(int (tank_position.x - m_tank_offset), int (tank_position.y - m_tank_offset));
-
-			if (!tile_walkable)
-			{
-				tank_position.x = tile_coordinates.x * 32 + 32 + (m_tank_offset + 1);
-			}
-			else {
-				//checking bottom left corner coordinates position
-				tile_walkable = m_map->get_tile_walkable_by_coordinates(int (tank_position.x - m_tank_offset), int (tank_position.y + m_tank_offset));
-
-				if (!tile_walkable)
-				{
-					tank_position.x = tile_coordinates.x * 32 + 32 + (m_tank_offset + 1);
-				}
-			}
-		}		
+			calibrate_position_moving_north_or_west(tank_position.x, top_left_corner, bot_left_corner, top_left_corner.x);
+		}
 	}
 	else if (tank_direction == sf::Vector2f(1.f, 0.f))
 	{
 		if (tank_position.x > (m_game_win_width - (m_tank_offset + 1)))
 		{
-			tank_position.x = float (m_game_win_width - (m_tank_offset + 1));
+			tank_position.x = float(m_game_win_width - (m_tank_offset + 1));
 		}
 		else {
-		
-			//checking bottom right corner coordinates position
-			tile_walkable = m_map->get_tile_walkable_by_coordinates(int (tank_position.x + m_tank_offset), int (tank_position.y + m_tank_offset));
-			tile_coordinates = m_map->get_tile_coordinates(int (tank_position.x + m_tank_offset), int (tank_position.y + m_tank_offset));
-
-			if (!tile_walkable)
-			{
-				tank_position.x = tile_coordinates.x * 32 - (m_tank_offset + 1);
-			}
-			else {
-				//checking top right corner coordinates position
-				tile_walkable = m_map->get_tile_walkable_by_coordinates(int (tank_position.x + m_tank_offset), int (tank_position.y - m_tank_offset));
-
-				if (!tile_walkable)
-				{
-					tank_position.x = tile_coordinates.x * 32 - (m_tank_offset + 1);
-				}
-			}		
+			calibrate_position_moving_south_or_east(tank_position.x, bot_right_corner, top_right_corner, bot_right_corner.x);
 		}
 	}
 	else if (tank_direction == sf::Vector2f(0.f, 1.f))
 	{
 		if (tank_position.y > (m_game_win_height - (m_tank_offset + 1)))
 		{
-			tank_position.y = float (m_game_win_height - (m_tank_offset + 1));
+			tank_position.y = float(m_game_win_height - (m_tank_offset + 1));
 		}
 		else {
-		
-			//checking bottom right corner coordinates position
-			tile_walkable = m_map->get_tile_walkable_by_coordinates(int (tank_position.x + m_tank_offset), int (tank_position.y + m_tank_offset));
-			tile_coordinates = m_map->get_tile_coordinates(int (tank_position.x + m_tank_offset), int (tank_position.y + m_tank_offset));
+			calibrate_position_moving_south_or_east(tank_position.y, bot_right_corner, bot_left_corner, bot_right_corner.y);
+		}
+	}
+}
 
-			if (!tile_walkable)
-			{
-				tank_position.y = tile_coordinates.y * 32 - (m_tank_offset + 1);
-			}
-			else
-			{
-				//checking bottom left corner coordinates position
-				tile_walkable = m_map->get_tile_walkable_by_coordinates(int (tank_position.x - m_tank_offset), int (tank_position.y + m_tank_offset));
+void Game::calibrate_position_moving_north_or_west(float& tank_position_axis, sf::Vector2i corner_1, sf::Vector2i corner_2, int corner_calibrate_axis) {
 
-				if (!tile_walkable)
-				{
-					tank_position.y = tile_coordinates.y * 32 - (m_tank_offset + 1);
-				}
-			}		
-		}		
+	bool walkable_left = m_map->get_tile_walkable_by_indices(corner_1.x, corner_1.y);
+
+	if (!walkable_left)
+	{
+		tank_position_axis = corner_calibrate_axis * 32 + 32 + (m_tank_offset + 1);
+	}
+	else {
+
+		//checking second corner coordinates position
+		bool walkable_right = m_map->get_tile_walkable_by_indices(corner_2.x, corner_2.y);
+
+		if (!walkable_right)
+		{
+			tank_position_axis = corner_calibrate_axis * 32 + 32 + (m_tank_offset + 1);
+		}
+	}
+}
+
+void Game::calibrate_position_moving_south_or_east(float& tank_position_axis, sf::Vector2i corner_1, sf::Vector2i corner_2, int corner_calibrate_axis) {
+
+	//checking first corner coordinates position
+	bool walkable_bot_right = m_map->get_tile_walkable_by_indices(corner_1.x, corner_1.y);
+
+	if (!walkable_bot_right)
+	{
+		tank_position_axis = corner_calibrate_axis * 32 - (m_tank_offset + 1);
+	}
+	else
+	{
+		//checking second corner coordinates position
+		bool walkable_bot_left = m_map->get_tile_walkable_by_indices(corner_2.x, corner_2.y);
+
+		if (!walkable_bot_left)
+		{
+			tank_position_axis = corner_calibrate_axis * 32 - (m_tank_offset + 1);
+		}
+	}
+}
+
+void Game::calibrate_projectile(Projectile& proj)
+{
+	sf::Vector2f proj_position = proj.get_position();
+	bool piercable = m_map->get_tile_pierceable_by_coordinates(proj_position.x, proj_position.y);
+
+	if (!piercable) {
+	
+		m_animation.play(0, sf::Vector2f(proj_position.x, proj_position.y), "explosioneffect.png");
+		delete_projectile(proj);
 	}
 }
 
@@ -583,24 +616,45 @@ sf::Vector2f Game::get_player_position()
 	return player_position;
 }
 
-void Game::projectile_shoot(int tank_i)
+void Game::projectile_shoot(Tank& tank)
 {
-	//attack enemy
-	Projectile proj_ai(&m_ai_tanks[tank_i]);
+	Projectile projectile(&tank);
 
-	if (!m_first_ai_bullet_shot) {
-		m_first_ai_bullet_shot = true;
-		m_last_ai_projectile_shot = m_total_time;
+	if (!tank.if_first_bullet_shot()) {
+		tank.first_bullet_shot();
+		tank.last_projectile_shot_time(m_total_time);
 
-		m_projectile_vector.push_back(std::move(proj_ai));
+		m_projectile_vector.push_back(std::move(projectile));
 	}
 	else {
-		if ((m_total_time - m_last_ai_projectile_shot) >= std::chrono::seconds{ 3 }) {
 
-			m_last_ai_projectile_shot = m_total_time;
-			m_projectile_vector.push_back(std::move(proj_ai));
+		std::chrono::duration<float> m_last_projectile_shot = tank.when_last_projectile_shot();
+
+		if ((m_total_time - m_last_projectile_shot) >= std::chrono::seconds{ 3 }) {
+
+			tank.last_projectile_shot_time(m_total_time);
+			m_projectile_vector.push_back(std::move(projectile));
 		}
-	}	
+	}
+}
+
+void Game::delete_projectile(Projectile& proj)
+{
+	std::swap(proj, m_projectile_vector.back());
+	m_projectile_vector.pop_back();
+}
+
+void Game::push_input_event(InputEvent& event)
+{
+	m_event_queue.pushEvent(event);
+}
+
+void Game::input_event(int buttonType, bool buttonPressed, sf::Vector2i pos, InputEvent& event, InputEvent::Type eventType)
+{
+	event.type = eventType;
+	event.buttonType = buttonType;
+	event.buttonPressed = buttonPressed;
+	event.position = pos;
 }
 
 sf::Vector2f Game::separating_axis(const Tank& ai_tank, const Tank& player_tank, sf::Vector2f player_pos) {
@@ -632,7 +686,6 @@ sf::Vector2f Game::separating_axis(const Tank& ai_tank, const Tank& player_tank,
 		if (overlap < 0) {
 
 			mtd = player_dir * overlap;
-
 		}
 	}
 
