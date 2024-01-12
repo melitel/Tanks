@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2022 Laurent Gomila (laurent@sfml-dev.org)
+// Copyright (C) 2007-2023 Laurent Gomila (laurent@sfml-dev.org)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -68,8 +68,8 @@ In Utf<8>::decode(In begin, In end, std::uint32_t& output, std::uint32_t replace
     // clang-format on
 
     // decode the character
-    int trailingBytes = trailing[static_cast<std::uint8_t>(*begin)];
-    if (begin + trailingBytes < end)
+    const int trailingBytes = trailing[static_cast<std::uint8_t>(*begin)];
+    if (trailingBytes < std::distance(begin, end))
     {
         output = 0;
 
@@ -127,15 +127,15 @@ Out Utf<8>::encode(std::uint32_t input, Out output, std::uint8_t replacement)
         // clang-format on
 
         // Extract the bytes to write
-        std::uint8_t bytes[4];
+        std::byte bytes[4];
 
         // clang-format off
         switch (bytestoWrite)
         {
-            case 4: bytes[3] = static_cast<std::uint8_t>((input | 0x80) & 0xBF); input >>= 6; [[fallthrough]];
-            case 3: bytes[2] = static_cast<std::uint8_t>((input | 0x80) & 0xBF); input >>= 6; [[fallthrough]];
-            case 2: bytes[1] = static_cast<std::uint8_t>((input | 0x80) & 0xBF); input >>= 6; [[fallthrough]];
-            case 1: bytes[0] = static_cast<std::uint8_t> (input | firstBytes[bytestoWrite]);
+            case 4: bytes[3] = static_cast<std::byte>((input | 0x80) & 0xBF); input >>= 6; [[fallthrough]];
+            case 3: bytes[2] = static_cast<std::byte>((input | 0x80) & 0xBF); input >>= 6; [[fallthrough]];
+            case 2: bytes[1] = static_cast<std::byte>((input | 0x80) & 0xBF); input >>= 6; [[fallthrough]];
+            case 1: bytes[0] = static_cast<std::byte> (input | firstBytes[bytestoWrite]);
         }
         // clang-format on
 
@@ -177,8 +177,8 @@ Out Utf<8>::fromAnsi(In begin, In end, Out output, const std::locale& locale)
 {
     while (begin < end)
     {
-        std::uint32_t codepoint = Utf<32>::decodeAnsi(*begin++, locale);
-        output                  = encode(codepoint, output);
+        const std::uint32_t codepoint = Utf<32>::decodeAnsi(*begin++, locale);
+        output                        = encode(codepoint, output);
     }
 
     return output;
@@ -301,14 +301,14 @@ Out Utf<8>::toUtf32(In begin, In end, Out output)
 template <typename In>
 In Utf<16>::decode(In begin, In end, std::uint32_t& output, std::uint32_t replacement)
 {
-    std::uint16_t first = *begin++;
+    const std::uint16_t first = *begin++;
 
     // If it's a surrogate pair, first convert to a single UTF-32 character
     if ((first >= 0xD800) && (first <= 0xDBFF))
     {
         if (begin < end)
         {
-            std::uint32_t second = *begin++;
+            const std::uint32_t second = *begin++;
             if ((second >= 0xDC00) && (second <= 0xDFFF))
             {
                 // The second element is valid: convert the two elements to a UTF-32 character
@@ -657,28 +657,11 @@ Out Utf<32>::toUtf32(In begin, In end, Out output)
 template <typename In>
 std::uint32_t Utf<32>::decodeAnsi(In input, [[maybe_unused]] const std::locale& locale)
 {
-    // On Windows, GCC's standard library (glibc++) has almost
-    // no support for Unicode stuff. As a consequence, in this
-    // context we can only use the default locale and ignore
-    // the one passed as parameter.
-
-#if defined(SFML_SYSTEM_WINDOWS) &&                         /* if Windows ... */                          \
-    (defined(__GLIBCPP__) || defined(__GLIBCXX__)) &&       /* ... and standard library is glibc++ ... */ \
-    !(defined(__SGI_STL_PORT) || defined(_STLPORT_VERSION)) /* ... and STLPort is not used on top of it */
-
-    wchar_t character = 0;
-    mbtowc(&character, &input, 1);
-    return static_cast<std::uint32_t>(character);
-
-#else
-
     // Get the facet of the locale which deals with character conversion
     const auto& facet = std::use_facet<std::ctype<wchar_t>>(locale);
 
     // Use the facet to convert each character of the input string
     return static_cast<std::uint32_t>(facet.widen(input));
-
-#endif
 }
 
 
@@ -700,25 +683,6 @@ std::uint32_t Utf<32>::decodeWide(In input)
 template <typename Out>
 Out Utf<32>::encodeAnsi(std::uint32_t codepoint, Out output, char replacement, [[maybe_unused]] const std::locale& locale)
 {
-    // On Windows, gcc's standard library (glibc++) has almost
-    // no support for Unicode stuff. As a consequence, in this
-    // context we can only use the default locale and ignore
-    // the one passed as parameter.
-
-#if defined(SFML_SYSTEM_WINDOWS) &&                         /* if Windows ... */                          \
-    (defined(__GLIBCPP__) || defined(__GLIBCXX__)) &&       /* ... and standard library is glibc++ ... */ \
-    !(defined(__SGI_STL_PORT) || defined(_STLPORT_VERSION)) /* ... and STLPort is not used on top of it */
-
-    char character = 0;
-    if (wctomb(&character, static_cast<wchar_t>(codepoint)) >= 0)
-        *output++ = character;
-    else if (replacement)
-        *output++ = replacement;
-
-    return output;
-
-#else
-
     // Get the facet of the locale which deals with character conversion
     const auto& facet = std::use_facet<std::ctype<wchar_t>>(locale);
 
@@ -726,8 +690,6 @@ Out Utf<32>::encodeAnsi(std::uint32_t codepoint, Out output, char replacement, [
     *output++ = facet.narrow(static_cast<wchar_t>(codepoint), replacement);
 
     return output;
-
-#endif
 }
 
 

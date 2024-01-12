@@ -29,7 +29,6 @@ public:
     std::chrono::duration<float> when_last_projectile_shot() override;
 
 private:
-
     void move_controller(float delta, int tank_i);
     void processing_state(sf::Vector2i ai_tank_tile, sf::Vector2i player_tank_tile, sf::Vector2i player_base_tile, int tank_i);
     void change_state(sf::Vector2i ai_tank_tile, sf::Vector2i player_tank_tile, sf::Vector2i player_base_tile, sf::Vector2i ai_base_tile);

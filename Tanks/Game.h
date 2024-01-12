@@ -16,8 +16,8 @@
 #include <array>
 #include <algorithm>
 #include <cmath>
+#include <random>
 #include "Command.h"
-#include "KillCountObserver.h"
 #include "AnimationObserver.h"
 #include "AudioObserver.h"
 #include "InputEventQueue.h"
@@ -26,7 +26,11 @@ class Game
 {
 
 public:
-
+	Game() :
+		m_life_text(m_game_font),
+		m_kill_count_text(m_game_font),
+		m_win_lose_text(m_game_font)
+		{}
 	std::unique_ptr<TileMap> m_map;
 	std::vector <AiTank> m_ai_tanks;
 	std::vector <BoostSprite> m_boosts;
@@ -66,10 +70,11 @@ public:
 	ControllableTank& get_player_tank() { return m_player_tank; }
 	sf::Vector2f separating_axis(const Tank& ai_tank, const Tank& player_tank, sf::Vector2f player_pos);
 	
-	void initialize(uint32_t window_width, uint32_t window_height, std::unique_ptr<sf::RenderWindow>& window);
+	void initialize(uint32_t window_width, uint32_t window_height);
+	void initialize_game_menu(uint32_t window_width, uint32_t window_height);
+	void initialize_game_start(uint32_t window_width, uint32_t window_height);
 	void update();
 	void draw(std::unique_ptr<sf::RenderWindow>& window);
-	//void gather_input(input_event events);
 	void process_input();
 	void calibrate_pos(sf::Vector2f& tank_position);
 	void calibrate_position_moving_north_or_west(float& tank_position_axis, sf::Vector2i corner_1, sf::Vector2i corner_2, int corner_calibrate_axis);
@@ -83,7 +88,9 @@ public:
 	~Game();
 	enum game_state {
 		gs_menu,
-		gs_game_start
+		gs_game_start,
+		gs_win,
+		gs_lose
 	};
 	game_state m_game_state;
 	using input_array = std::array<bool, input_event::keyboard_event::key::k_size>;
@@ -95,7 +102,6 @@ public:
 
 private:
 
-	KillCountObserver killCountObserver;
 	AudioObserver audioObserver;
 	AnimationObserver animationObserver;
 	InputEventQueue m_event_queue;
@@ -106,17 +112,14 @@ private:
 	std::vector <Command*> m_commands;
 	ControllableTank m_player_tank;	
 
-	//Base m_player_base{ 50, 10, 1 };
-	//Base m_ai_base{50, 10, 0};
-	Base m_player_base{ 1 };
-	Base m_ai_base{ 0 };
+	Base m_player_base{ 5, 1 };
+	Base m_ai_base{ 5, 0 };
 
 	std::vector <Projectile> m_projectile_vector;
 	
 	std::vector <sf::Vector2f> m_ai_spawn_pos{sf::Vector2f((13*32) + 16, (2*32) + 16), 
 		sf::Vector2f((2 * 32) + 16, (8 * 32) + 16), 
 		sf::Vector2f((20 * 32) + 16, (13 * 32) + 16) };
-//	float m_projectile_distance = 64;
 	
 	float m_tank_offset = 16;
 	float m_base_offset_x = 24;
@@ -133,6 +136,9 @@ private:
 	sf::RectangleShape m_kill_count_icon;
 	sf::Texture m_kill_count_texture;
 	sf::Text m_kill_count_text;
+	sf::Text m_win_lose_text;
+	sf::RectangleShape m_replay_button;
+	sf::Texture* m_replay_button_tex;
 	sf::Font m_game_font;
 
 
@@ -147,6 +153,10 @@ private:
 	//std::chrono::duration<float> m_last_projectile_shot{0};
 	std::chrono::duration<float> m_last_ai_projectile_shot{ 0 };
 	
+	std::random_device rd; // obtain a random number from hardware
+	std::mt19937 gen{ rd() }; // seed the generator
+	std::uniform_int_distribution<> distx{ 1, 26 }; // define the range
+	std::uniform_int_distribution<> disty{ 1, 19 }; // define the range
 	sf::Vector2f random_spawn_point();
 
 };

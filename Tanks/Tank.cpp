@@ -26,7 +26,7 @@ void Tank::move_tank(movement_direction direction, float delta) {
 
 void Tank::hitByBullet()
 {
-	kill_count();
+	//kill_count();
 
 	// Notify all observers
 	for (Observer* observer : observers) {

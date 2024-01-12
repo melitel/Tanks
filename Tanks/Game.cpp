@@ -6,10 +6,47 @@ Game* g_Game = nullptr;
 PowerUp* m_life_boost = new LifeBoostPowerUp();
 PowerUp* m_speed_boost = new SpeedBoostPowerUp();
 
-void Game::initialize(uint32_t window_width, uint32_t window_height, std::unique_ptr<sf::RenderWindow> &window)
+void Game::initialize(uint32_t window_width, uint32_t window_height)
+{
+	m_game_state = gs_menu;
+
+	m_game_win_width = window_width;
+	m_game_win_height = window_height;
+
+	initialize_game_menu(window_width, window_height);
+}
+
+void Game::initialize_game_menu(uint32_t window_width, uint32_t window_height)
 {	
+	m_menu_background.setSize(sf::Vector2f((float)m_game_win_width, (float)m_game_win_height));
+	m_menu_background.setPosition(sf::Vector2f(0.f, 0.f));
+	if (!m_background_tex.loadFromFile("background.jpg"))
+	{
+		std::cout << "Error";
+	}
+	m_menu_background.setTexture(&m_background_tex);
+
+	m_start_button.setSize(sf::Vector2f(225.f, 90.f));
+	m_start_button.setPosition(sf::Vector2f(310.f, 200.f));
+	if (!m_start_button_tex.loadFromFile("startbutton.png"))
+	{
+		std::cout << "Error";
+	}
+	m_start_button.setTexture(&m_start_button_tex);
+}
+
+void Game::initialize_game_start(uint32_t window_width, uint32_t window_height)
+{		
 	m_input_state.fill(false);
 	m_boosts.clear();
+	m_ai_tanks.clear();
+	m_map = std::make_unique<TileMap>();
+	m_map->read_level_from_file("level.txt");
+
+	if (!m_map->load("tileset.png"))
+	{
+		std::cout << "Error";
+	}
 
 	if (!m_game_font.loadFromFile("arial.ttf"))
 	{
@@ -19,26 +56,13 @@ void Game::initialize(uint32_t window_width, uint32_t window_height, std::unique
 	m_player_tank.initialize(sf::Vector2f(432.f, 592.f));
 
 	// Attach observers to the tank
-	//m_player_tank.addObserver(&killCountObserver);
 	m_player_tank.addObserver(&audioObserver);
 	m_player_tank.addObserver(&animationObserver);
 
 	m_ai_tanks.push_back(AiTank("aitank.png", 1, 10, 1, 60.f, 0, AiTank::attack));
+	m_ai_tanks.back().initialize(m_ai_spawn_pos[1]);
 	m_ai_tanks.push_back(AiTank("aitank.png", 1, 10, 1, 60.f, 0, AiTank::defence));
-	
-	m_game_win_width = window_width;
-	m_game_win_height = window_height;		
-
-	m_map = std::make_unique<TileMap>();
-	m_game_state = gs_menu;
-
-	m_menu_background.setSize(sf::Vector2f((float)m_game_win_width, (float)m_game_win_height));
-	m_menu_background.setPosition(sf::Vector2f(0.f, 0.f));
-	if (!m_background_tex.loadFromFile("background.jpg"))
-	{
-		std::cout << "Error";
-	}
-	m_menu_background.setTexture(&m_background_tex);
+	m_ai_tanks.back().initialize(m_ai_spawn_pos[0]);
 
 	m_game_background.setSize(sf::Vector2f((float)m_game_win_width, (float)m_game_win_height));
 	m_game_background.setPosition(sf::Vector2f(0.f, 0.f));
@@ -46,6 +70,7 @@ void Game::initialize(uint32_t window_width, uint32_t window_height, std::unique
 	
 	m_player_life.setSize(sf::Vector2f(32.f, 32.f));
 	m_player_life.setPosition(sf::Vector2f(32.f, 0.f));
+
 	if (!m_life_texture.loadFromFile("heart.png"))
 	{
 		std::cout << "Error";
@@ -72,31 +97,15 @@ void Game::initialize(uint32_t window_width, uint32_t window_height, std::unique
 		std::cout << "Error";
 	}
 	m_kill_count_icon.setTexture(&m_kill_count_texture);
-
 	m_kill_count_text.setCharacterSize(25);
 	m_kill_count_text.setFillColor(sf::Color::White);
 	m_kill_count_text.setPosition(sf::Vector2f(800.f, 0.f));
 	m_kill_count_text.setString("0");
-	m_kill_count_text.setFont(m_game_font);
+	m_kill_count_text.setFont(m_game_font);		
 
-	m_start_button.setSize(sf::Vector2f(225.f, 90.f));
-	m_start_button.setPosition(sf::Vector2f(310.f, 200.f));
-	if (!m_start_button_tex.loadFromFile("startbutton.png"))
-	{
-		std::cout << "Error";
-	}
-	m_start_button.setTexture(&m_start_button_tex);		
-
-	m_map->read_level_from_file("level.txt");
-
-	if (!m_map->load("tileset.png"))
-	{
-		std::cout << "Error";
-	}
-
-	for (int i = 0; i < m_ai_tanks.size(); ++i) {		
+	/*for (int i = 0; i < m_ai_tanks.size(); ++i) {		
 		m_ai_tanks[i].initialize(m_ai_spawn_pos[0]);
-	}
+	}*/
 	m_player_base.initialize(sf::Vector2f(432.f, 592.f), "base.png");
 	m_ai_base.initialize(sf::Vector2f(432.f, 80.f), "base.png");
 	m_player_base.rotate_base(sf::degrees(180.f));	
@@ -171,6 +180,32 @@ void Game::update()
 			}
 		}
 	}
+	if (m_game_state == gs_win) {
+
+		m_win_lose_text.setCharacterSize(75);
+		m_win_lose_text.setFillColor(sf::Color::Black);
+		m_win_lose_text.setPosition(sf::Vector2f(260.f, 150.f));
+		m_win_lose_text.setString("You Won!");
+		m_win_lose_text.setFont(m_game_font);
+
+		m_replay_button.setSize(sf::Vector2f(225.f, 70.f));
+		m_replay_button.setPosition(sf::Vector2f(310.f, 270.f));
+		m_replay_button_tex = &TextureManager::GetTexture("replaybutton.png");
+		m_replay_button.setTexture(m_replay_button_tex);
+	}
+
+	if (m_game_state == gs_lose) {
+		m_win_lose_text.setCharacterSize(75);
+		m_win_lose_text.setFillColor(sf::Color::Black);
+		m_win_lose_text.setPosition(sf::Vector2f(260.f, 150.f));
+		m_win_lose_text.setString("You Lose!");
+		m_win_lose_text.setFont(m_game_font);
+
+		m_replay_button.setSize(sf::Vector2f(225.f, 70.f));
+		m_replay_button.setPosition(sf::Vector2f(310.f, 270.f));
+		m_replay_button_tex = &TextureManager::GetTexture("replaybutton.png");
+		m_replay_button.setTexture(m_replay_button_tex);
+	}
 
 	for (int j = 0; j < m_commands.size(); ++j) {
 	
@@ -215,6 +250,7 @@ void Game::update()
 				m_player_tank.kill_count();
 
 				uint32_t kills_count = m_player_tank.get_kill_count();
+
 				// Convert integer to string
 				std::stringstream ss;
 				ss << kills_count;
@@ -231,9 +267,7 @@ void Game::update()
 					}
 					else {
 						m_ai_tanks.erase(m_ai_tanks.begin() + j);
-						m_ai_tanks.push_back(AiTank("aitank.png", 1, 10, 1, 60.f, 0, AiTank::attack));
-						/*int position = rand() % 3;
-						m_ai_tanks.back().initialize(m_ai_spawn_pos[position]);*/
+						m_ai_tanks.push_back(AiTank("aitank.png", 1, 10, 1, 60.f, 0, AiTank::attack));						
 						sf::Vector2f position = random_spawn_point();
 						m_ai_tanks.back().initialize(sf::Vector2f(position.x + m_tank_offset, position.y + m_tank_offset));
 					}
@@ -246,16 +280,36 @@ void Game::update()
 
 		if (projectile_bounds.findIntersection(ai_base_bounds) && proj_owner_team_id == 1) {
 			m_animation.play(0, sf::Vector2f(ai_base_position.x - m_base_offset_x, ai_base_position.y - m_base_offset_y), "explosioneffect.png");
+			m_ai_base.modify_life(-1);
+			int ai_base_hp = m_ai_base.get_life();
 			delete_projectile(proj);
+			if (ai_base_hp == 0) {
+				m_game_state = gs_win;
+			}
 		}
 		if (projectile_bounds.findIntersection(player_tank_bounds) && proj_owner_team_id == 0) {
 			m_player_tank.hitByBullet();
 			//m_animation.play(0, sf::Vector2f(player_tank_position.x - m_tank_offset, player_tank_position.y - m_tank_offset), "explosioneffect.png");
+			m_player_tank.modify_life(-1);
+			uint32_t player_life = m_player_tank.get_life();
+			// Convert integer to string
+			std::stringstream pl;
+			pl << player_life;
+			std::string playerLifeString = pl.str();
+			m_life_text.setString(playerLifeString);
 			delete_projectile(proj);
+			if (player_life == 0) {
+				m_game_state = gs_lose;
+			}
 		}
 		if (projectile_bounds.findIntersection(player_base_bounds) && proj_owner_team_id == 0) {
 			m_animation.play(0, sf::Vector2f(player_base_position.x - m_base_offset_x, player_base_position.y - m_base_offset_y), "explosioneffect.png");
+			m_player_base.modify_life(-1);
+			int player_base_hp = m_player_base.get_life();
 			delete_projectile(proj);
+			if (player_base_hp == 0) {
+				m_game_state = gs_lose;
+			}
 		}
 	}
 
@@ -295,6 +349,11 @@ void Game::draw(std::unique_ptr<sf::RenderWindow>& window)
 		}
 		m_animation.draw(window);		
 	}
+	if (m_game_state == gs_win || m_game_state == gs_lose) {
+		window->draw(m_menu_background);
+		window->draw(m_win_lose_text);
+		window->draw(m_replay_button);
+	}
 
 	if (!m_projectile_vector.empty())
 	{
@@ -307,79 +366,11 @@ void Game::draw(std::unique_ptr<sf::RenderWindow>& window)
 	window->display();
 }
 
-//void Game::gather_input(input_event events)
-//{	
-//	sf::FloatRect start_bounds = m_start_button.getGlobalBounds();
-//	
-//	if (!events.mouse_events.empty() && m_game_state == gs_menu)
-//	{
-//		for (int i = 0; i < events.mouse_events.size(); ++i)
-//		{
-//			if (events.mouse_events[i].left_button_pressed)
-//			{
-//				if (start_bounds.contains((sf::Vector2f)(events.mouse_events[i].position)))
-//				{
-//					m_game_state = gs_game_start;
-//				}
-//			}
-//		}
-//	}
-//	
-//
-//	if (!events.keyboard_events.empty())
-//	{		
-//		for (int i = 0; i < events.keyboard_events.size(); ++i)
-//		{
-//			if (events.keyboard_events[i].isPressed && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_W)
-//			{				
-//				m_input_state[input_event::keyboard_event::k_W] = true;			
-//			}
-//			if (events.keyboard_events[i].isPressed && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_D)
-//			{
-//				m_input_state[input_event::keyboard_event::k_D] = true;
-//			}
-//			if (events.keyboard_events[i].isPressed && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_A)
-//			{
-//				m_input_state[input_event::keyboard_event::k_A] = true;
-//			}
-//			if (events.keyboard_events[i].isPressed && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_S)
-//			{
-//				m_input_state[input_event::keyboard_event::k_S] = true;
-//			}
-//			if (events.keyboard_events[i].isPressed && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_Space)
-//			{				
-//				Command* command;
-//				command = new FireCommand;
-//				m_commands.push_back(command);						
-//			}
-//			if (events.keyboard_events[i].isReleased && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_W)
-//			{
-//				m_input_state[input_event::keyboard_event::k_W] = false;
-//			}
-//			if (events.keyboard_events[i].isReleased && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_A)
-//			{
-//				m_input_state[input_event::keyboard_event::k_A] = false;
-//			}
-//			if (events.keyboard_events[i].isReleased && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_S)
-//			{
-//				m_input_state[input_event::keyboard_event::k_S] = false;
-//			}
-//			if (events.keyboard_events[i].isReleased && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_D)
-//			{
-//				m_input_state[input_event::keyboard_event::k_D] = false;
-//			}
-//			if (events.keyboard_events[i].isReleased && events.keyboard_events[i].key_pressed == input_event::keyboard_event::k_Space)
-//			{
-//				m_input_state[input_event::keyboard_event::k_Space] = false;
-//			}
-//		}
-//	}
-//}
-
 void Game::process_input()
 {
 	InputEvent event;
-	sf::FloatRect start_bounds = m_start_button.getGlobalBounds();	
+	sf::FloatRect start_bounds = m_start_button.getGlobalBounds();
+	sf::FloatRect replay_bounds = m_replay_button.getGlobalBounds();
 
 	// Process the event queue
 	while (m_event_queue.hasEvents()) {
@@ -392,6 +383,12 @@ void Game::process_input()
 			if (start_bounds.contains(sf::Vector2f(event.position)))
 			{
 				m_game_state = gs_game_start;
+				initialize_game_start(m_game_win_width, m_game_win_height);
+			}
+			if (replay_bounds.contains(sf::Vector2f(event.position)))
+			{
+				m_game_state = gs_menu;	
+				initialize_game_menu(m_game_win_width, m_game_win_height);
 			}
 			break;
 		case InputEvent::Type::ButtonClick:
@@ -474,8 +471,8 @@ sf::Vector2f Game::random_spawn_point()
 
 	do {
 
-		int x = rand() % 27;
-		int y = rand() % 20;
+		int x = distx(gen);
+		int y = disty(gen);
 		
 		bool walkable = m_map->get_tile_walkable_by_indices(x, y);
 

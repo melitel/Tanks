@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2022 Laurent Gomila (laurent@sfml-dev.org)
+// Copyright (C) 2007-2023 Laurent Gomila (laurent@sfml-dev.org)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -22,8 +22,7 @@
 //
 ////////////////////////////////////////////////////////////
 
-#ifndef SFML_IMAGE_HPP
-#define SFML_IMAGE_HPP
+#pragma once
 
 ////////////////////////////////////////////////////////////
 // Headers
@@ -34,7 +33,8 @@
 #include <SFML/Graphics/Rect.hpp>
 
 #include <filesystem>
-#include <string>
+#include <optional>
+#include <string_view>
 #include <vector>
 
 
@@ -56,7 +56,7 @@ public:
     /// \param color Fill color
     ///
     ////////////////////////////////////////////////////////////
-    void create(const Vector2u& size, const Color& color = Color(0, 0, 0));
+    void create(const Vector2u& size, const Color& color = Color::Black);
 
     ////////////////////////////////////////////////////////////
     /// \brief Create the image from an array of pixels
@@ -76,8 +76,8 @@ public:
     /// \brief Load the image from a file on disk
     ///
     /// The supported image formats are bmp, png, tga, jpg, gif,
-    /// psd, hdr and pic. Some format options are not supported,
-    /// like progressive jpeg.
+    /// psd, hdr, pic and pnm. Some format options are not supported,
+    /// like jpeg with arithmetic coding or ASCII pnm.
     /// If this function fails, the image is left unchanged.
     ///
     /// \param filename Path of the image file to load
@@ -93,8 +93,8 @@ public:
     /// \brief Load the image from a file in memory
     ///
     /// The supported image formats are bmp, png, tga, jpg, gif,
-    /// psd, hdr and pic. Some format options are not supported,
-    /// like progressive jpeg.
+    /// psd, hdr, pic and pnm. Some format options are not supported,
+    /// like jpeg with arithmetic coding or ASCII pnm.
     /// If this function fails, the image is left unchanged.
     ///
     /// \param data Pointer to the file data in memory
@@ -111,8 +111,8 @@ public:
     /// \brief Load the image from a custom stream
     ///
     /// The supported image formats are bmp, png, tga, jpg, gif,
-    /// psd, hdr and pic. Some format options are not supported,
-    /// like progressive jpeg.
+    /// psd, hdr, pic and pnm. Some format options are not supported,
+    /// like jpeg with arithmetic coding or ASCII pnm.
     /// If this function fails, the image is left unchanged.
     ///
     /// \param stream Source stream to read from
@@ -149,15 +149,15 @@ public:
     /// This function fails if the image is empty, or if
     /// the format was invalid.
     ///
-    /// \param output Buffer to fill with encoded data
     /// \param format Encoding format to use
     ///
-    /// \return True if saving was successful
+    /// \return Buffer with encoded data if saving was successful,
+    ///     otherwise std::nullopt
     ///
     /// \see create, loadFromFile, loadFromMemory, saveToFile
     ///
     ////////////////////////////////////////////////////////////
-    [[nodiscard]] bool saveToMemory(std::vector<std::uint8_t>& output, const std::string& format) const;
+    [[nodiscard]] std::optional<std::vector<std::uint8_t>> saveToMemory(std::string_view format) const;
 
     ////////////////////////////////////////////////////////////
     /// \brief Return the size (width and height) of the image
@@ -284,9 +284,6 @@ private:
 };
 
 } // namespace sf
-
-
-#endif // SFML_IMAGE_HPP
 
 
 ////////////////////////////////////////////////////////////

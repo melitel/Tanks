@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2022 Laurent Gomila (laurent@sfml-dev.org)
+// Copyright (C) 2007-2023 Laurent Gomila (laurent@sfml-dev.org)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -22,8 +22,7 @@
 //
 ////////////////////////////////////////////////////////////
 
-#ifndef SFML_SOUNDBUFFER_HPP
-#define SFML_SOUNDBUFFER_HPP
+#pragma once
 
 ////////////////////////////////////////////////////////////
 // Headers
@@ -31,6 +30,7 @@
 #include <SFML/Audio/Export.hpp>
 
 #include <SFML/Audio/AlResource.hpp>
+
 #include <SFML/System/Time.hpp>
 
 #include <filesystem>
@@ -275,16 +275,13 @@ private:
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-    unsigned int              m_buffer;   //!< OpenAL buffer identifier
+    unsigned int              m_buffer{}; //!< OpenAL buffer identifier
     std::vector<std::int16_t> m_samples;  //!< Samples buffer
     Time                      m_duration; //!< Sound duration
     mutable SoundList         m_sounds;   //!< List of sounds that are using this buffer
 };
 
 } // namespace sf
-
-
-#endif // SFML_SOUNDBUFFER_HPP
 
 
 ////////////////////////////////////////////////////////////
@@ -334,16 +331,14 @@ private:
 ///     // error...
 /// }
 ///
-/// // Create a sound source and bind it to the buffer
-/// sf::Sound sound1;
-/// sound1.setBuffer(buffer);
+/// // Create a sound source bound to the buffer
+/// sf::Sound sound1(buffer);
 ///
 /// // Play the sound
 /// sound1.play();
 ///
 /// // Create another sound source bound to the same buffer
-/// sf::Sound sound2;
-/// sound2.setBuffer(buffer);
+/// sf::Sound sound2(buffer);
 ///
 /// // Play it with a higher pitch -- the first sound remains unchanged
 /// sound2.setPitch(2);

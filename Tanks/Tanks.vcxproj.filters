@@ -78,9 +78,6 @@
     <ClCompile Include="HeaderTile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="KillCountObserver.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="AudioObserver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -162,9 +159,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HeaderTile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KillCountObserver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AudioObserver.h">

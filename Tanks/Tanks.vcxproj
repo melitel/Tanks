@@ -56,7 +56,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)third_party\SFML\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>sfml-audio-d.lib;sfml-graphics-d.lib;sfml-main-d.lib;sfml-system-d.lib;sfml-window-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>sfml-audio-d.lib;sfml-graphics-d.lib;sfml-main-s-d.lib;sfml-system-d.lib;sfml-window-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>XCOPY $(SolutionDir)third_party\SFML\bin $(OutDir) /i /c /k /y/d
@@ -107,7 +107,6 @@ XCOPY $(SolutionDir)textures\ $(OutDir) /i /c /k /y /d</Command>
     <ClCompile Include="GrassTile.cpp" />
     <ClCompile Include="HeaderTile.cpp" />
     <ClCompile Include="InputEventQueue.cpp" />
-    <ClCompile Include="KillCountObserver.cpp" />
     <ClCompile Include="LifeBoostPowerUp.cpp" />
     <ClCompile Include="Observer.cpp" />
     <ClCompile Include="PowerUp.cpp" />
@@ -139,7 +138,6 @@ XCOPY $(SolutionDir)textures\ $(OutDir) /i /c /k /y /d</Command>
     <ClInclude Include="GrassTile.h" />
     <ClInclude Include="HeaderTile.h" />
     <ClInclude Include="InputEventQueue.h" />
-    <ClInclude Include="KillCountObserver.h" />
     <ClInclude Include="LifeBoostPowerUp.h" />
     <ClInclude Include="Observer.h" />
     <ClInclude Include="PowerUp.h" />

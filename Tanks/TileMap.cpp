@@ -13,7 +13,7 @@ bool TileMap::load(const std::string& tileset)
 		return false;	
 
 	// resize the vertex array to fit the level size
-	m_vertices.setPrimitiveType(sf::Triangles);
+	m_vertices.setPrimitiveType(sf::PrimitiveType::Triangles);
 	m_vertices.resize(m_width * m_height * 6);
 
 	// populate the vertex array, with one quad per tile

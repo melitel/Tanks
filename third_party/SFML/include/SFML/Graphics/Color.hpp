@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2022 Laurent Gomila (laurent@sfml-dev.org)
+// Copyright (C) 2007-2023 Laurent Gomila (laurent@sfml-dev.org)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -22,8 +22,7 @@
 //
 ////////////////////////////////////////////////////////////
 
-#ifndef SFML_COLOR_HPP
-#define SFML_COLOR_HPP
+#pragma once
 
 ////////////////////////////////////////////////////////////
 // Headers
@@ -81,6 +80,7 @@ public:
     ////////////////////////////////////////////////////////////
     // Static member data
     ////////////////////////////////////////////////////////////
+    // NOLINTBEGIN(readability-identifier-naming)
     static const Color Black;       //!< Black predefined color
     static const Color White;       //!< White predefined color
     static const Color Red;         //!< Red predefined color
@@ -90,14 +90,15 @@ public:
     static const Color Magenta;     //!< Magenta predefined color
     static const Color Cyan;        //!< Cyan predefined color
     static const Color Transparent; //!< Transparent (black) predefined color
+    // NOLINTEND(readability-identifier-naming)
 
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-    std::uint8_t r; //!< Red component
-    std::uint8_t g; //!< Green component
-    std::uint8_t b; //!< Blue component
-    std::uint8_t a; //!< Alpha (opacity) component
+    std::uint8_t r{};    //!< Red component
+    std::uint8_t g{};    //!< Green component
+    std::uint8_t b{};    //!< Blue component
+    std::uint8_t a{255}; //!< Alpha (opacity) component
 };
 
 ////////////////////////////////////////////////////////////
@@ -228,9 +229,6 @@ constexpr Color& operator*=(Color& left, const Color& right);
 #include <SFML/Graphics/Color.inl>
 
 } // namespace sf
-
-
-#endif // SFML_COLOR_HPP
 
 
 ////////////////////////////////////////////////////////////

@@ -10,6 +10,7 @@ int third_button_index = -2;
 void ControllableTank::initialize(const sf::Vector2f& pos)
 {
 	Tank::initialize(pos);
+	m_life = 3;
 	m_first_bullet_shot = false;
 	m_kills_count = 0;
 }

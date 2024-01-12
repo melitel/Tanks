@@ -12,12 +12,8 @@ void Application::run()
 {
 	m_game = std::make_unique<Game>();
 	m_window = std::make_unique<sf::RenderWindow>(sf::VideoMode(sf::Vector2u(m_window_width, m_window_height)), "Tanks");
-	m_game->initialize(m_window_width, m_window_height, m_window);
-	//Game::input_event events;
-	//Game::input_event::mouse_event input_mouse_event;
-	//Game::input_event::keyboard_event input_key_event;	
+	m_game->initialize(m_window_width, m_window_height);
 
-	//Game::game_state state;
 	InputEvent inputEvent;
 
 	while (m_window->isOpen())
@@ -33,7 +29,7 @@ void Application::run()
 
 			if (event.type == sf::Event::MouseButtonReleased)
 			{
-				if (event.mouseButton.button == sf::Mouse::Left)
+				if (event.mouseButton.button == sf::Mouse::Button::Left)
 				{
 					sf::Vector2i pos = sf::Mouse::getPosition(*m_window);
 					m_game->input_event(6, true, pos, inputEvent, InputEvent::Type::MouseClick);
