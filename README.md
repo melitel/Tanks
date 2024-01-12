@@ -15,5 +15,3 @@ Game Loop
 Update Method 
 Event Queue
 
-**Відео ігрового процесу**
-https://youtu.be/-UxdDs0qnOw
