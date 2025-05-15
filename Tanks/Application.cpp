@@ -32,7 +32,7 @@ void Application::run()
 				if (event.mouseButton.button == sf::Mouse::Button::Left)
 				{
 					sf::Vector2i pos = sf::Mouse::getPosition(*m_window);
-					m_game->input_event(InputKey::Size, true, pos, inputEvent, InputEvent::Type::MouseClick);
+					m_game->input_event(InputKey::Undefined, true, pos, inputEvent, InputEvent::Type::MouseClick);
 					m_game->push_input_event(inputEvent);
 				}				
 			}

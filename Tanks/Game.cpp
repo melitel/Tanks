@@ -409,34 +409,34 @@ void Game::process_input()
 			// ... Handle key pressed event ...
 			if (event.key_pressed == InputKey::W) {
 				if (event.buttonPressed == true) {
-					m_input_state[to_index(InputKey::W)] = true;
+					m_input_state[InputKey::W] = true;
 				}
 				else {
-					m_input_state[to_index(InputKey::W)] = false;
+					m_input_state[InputKey::W] = false;
 				}
 			}
 			if (event.key_pressed == InputKey::A) {
 				if (event.buttonPressed == true) {
-					m_input_state[to_index(InputKey::A)] = true;
+					m_input_state[InputKey::A] = true;
 				}
 				else {
-					m_input_state[to_index(InputKey::A)] = false;
+					m_input_state[InputKey::A] = false;
 				}
 			}
 			if (event.key_pressed == InputKey::S) {
 				if (event.buttonPressed == true) {
-					m_input_state[to_index(InputKey::S)] = true;
+					m_input_state[InputKey::S] = true;
 				}
 				else {
-					m_input_state[to_index(InputKey::S)] = false;
+					m_input_state[InputKey::S] = false;
 				}
 			}
 			if (event.key_pressed == InputKey::D) {
 				if (event.buttonPressed == true) {
-					m_input_state[to_index(InputKey::D)] = true;
+					m_input_state[InputKey::D] = true;
 				}
 				else {
-					m_input_state[to_index(InputKey::D)] = false;
+					m_input_state[InputKey::D] = false;
 				}
 			}
 			if (event.key_pressed == InputKey::Q) {

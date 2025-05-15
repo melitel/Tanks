@@ -97,7 +97,7 @@ public:
 		gs_lose
 	};
 	game_state m_game_state;
-	using input_array = std::array<bool, to_index(InputKey::Size)>;
+	using input_array = std::array<bool, InputKey::Size>;
 	input_array m_input_state;
 	int count_inputs(input_array inputs);
 	game_state getGameState() const {
