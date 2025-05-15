@@ -59,9 +59,14 @@ void Application::run()
 					m_game->input_event(3, true, sf::Vector2i(0, 0), inputEvent, InputEvent::Type::ButtonClick);
 					m_game->push_input_event(inputEvent);
 				}
-				if (event.key.code == sf::Keyboard::Key::Space)
+				if (event.key.code == sf::Keyboard::Key::Q)
 				{
 					m_game->input_event(4, true, sf::Vector2i(0, 0), inputEvent, InputEvent::Type::ButtonClick);
+					m_game->push_input_event(inputEvent);
+				}
+				if (event.key.code == sf::Keyboard::Key::Space)
+				{
+					m_game->input_event(5, true, sf::Vector2i(0, 0), inputEvent, InputEvent::Type::ButtonClick);
 					m_game->push_input_event(inputEvent);
 				}
 			}			
@@ -88,10 +93,15 @@ void Application::run()
 					m_game->input_event(3, false, sf::Vector2i(0, 0), inputEvent, InputEvent::Type::ButtonClick);
 					m_game->push_input_event(inputEvent);
 				}
-				if (event.key.code == sf::Keyboard::Key::Space)
+				if (event.key.code == sf::Keyboard::Key::Q)
 				{
 					m_game->input_event(4, false, sf::Vector2i(0, 0), inputEvent, InputEvent::Type::ButtonClick);
-					m_game->push_input_event(inputEvent);					
+					m_game->push_input_event(inputEvent);
+				}
+				if (event.key.code == sf::Keyboard::Key::Space)
+				{
+					m_game->input_event(5, false, sf::Vector2i(0, 0), inputEvent, InputEvent::Type::ButtonClick);
+					m_game->push_input_event(inputEvent);
 				}
 			}
 

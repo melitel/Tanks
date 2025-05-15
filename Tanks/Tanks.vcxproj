@@ -114,6 +114,7 @@ XCOPY $(SolutionDir)textures\ $(OutDir) /i /c /k /y /d</Command>
     <ClCompile Include="SpeedBoostPowerUp.cpp" />
     <ClCompile Include="Tank.cpp" />
     <ClCompile Include="Tanks.cpp" />
+    <ClCompile Include="TeleportCommand.cpp" />
     <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="Tile.cpp" />
     <ClCompile Include="TileMap.cpp" />
@@ -144,6 +145,7 @@ XCOPY $(SolutionDir)textures\ $(OutDir) /i /c /k /y /d</Command>
     <ClInclude Include="Projectile.h" />
     <ClInclude Include="SpeedBoostPowerUp.h" />
     <ClInclude Include="Tank.h" />
+    <ClInclude Include="TeleportCommand.h" />
     <ClInclude Include="TextureManager.h" />
     <ClInclude Include="Tile.h" />
     <ClInclude Include="TileMap.h" />

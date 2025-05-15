@@ -29,7 +29,8 @@ public:
 	Game() :
 		m_life_text(m_game_font),
 		m_kill_count_text(m_game_font),
-		m_win_lose_text(m_game_font)
+		m_win_lose_text(m_game_font),
+		m_teleport_timer_text(m_game_font)
 		{}
 	std::unique_ptr<TileMap> m_map;
 	std::vector <AiTank> m_ai_tanks;
@@ -51,7 +52,7 @@ public:
 
 		struct keyboard_event
 		{
-			enum key { k_W, k_A, k_S, k_D, k_Space, k_size };
+			enum key { k_W, k_A, k_S, k_D, k_Q, k_Space, k_size };
 			key key_pressed;
 			bool isPressed = false;
 			bool isReleased = false;
@@ -84,6 +85,9 @@ public:
 	void delete_projectile(Projectile& proj);
 	void push_input_event(InputEvent &event);
 	void input_event(int buttonType, bool buttonPressed, sf::Vector2i pos, InputEvent& event, InputEvent::Type eventType);
+	void teleport();
+	void update_teleport_timer(std::chrono::time_point<std::chrono::system_clock> m_time);
+	void initialize_teleport_timer();
 
 	~Game();
 	enum game_state {
@@ -137,11 +141,14 @@ private:
 	sf::Texture m_kill_count_texture;
 	sf::Text m_kill_count_text;
 	sf::Text m_win_lose_text;
+	sf::Text m_teleport_timer_text;
 	sf::RectangleShape m_replay_button;
 	sf::Texture* m_replay_button_tex;
 	sf::Font m_game_font;
 
-
+	bool m_teleport_available = true;
+	std::uint32_t m_teleport_cooldown = 10;
+	std::chrono::time_point<std::chrono::system_clock> m_teleport_start_time{ std::chrono::system_clock::now() };
 	std::chrono::time_point<std::chrono::system_clock> m_time{ std::chrono::system_clock::now() };
 	std::chrono::time_point<std::chrono::system_clock> m_start_time{ std::chrono::system_clock::now() };
 	std::chrono::time_point<std::chrono::system_clock> start_animation_time = std::chrono::system_clock::now();
@@ -158,6 +165,5 @@ private:
 	std::uniform_int_distribution<> distx{ 1, 26 }; // define the range
 	std::uniform_int_distribution<> disty{ 1, 19 }; // define the range
 	sf::Vector2f random_spawn_point();
-
 };
 
