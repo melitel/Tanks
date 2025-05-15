@@ -146,7 +146,7 @@ void Game::update()
 	if (m_game_state == game_state::gs_game_start) {
 
 		m_player_tank.update(delta, 0);
-		update_teleport_timer(m_time);
+		update_teleport_timer();
 
 		if (!m_ai_tanks.empty()) {
 			for (int i = 0; i < m_ai_tanks.size(); ++i) {
@@ -407,44 +407,44 @@ void Game::process_input()
 			break;
 		case InputEvent::Type::ButtonClick:
 			// ... Handle key pressed event ...
-			if (event.buttonType == 0) {
+			if (event.key_pressed == InputKey::W) {
 				if (event.buttonPressed == true) {
-					m_input_state[input_event::keyboard_event::k_W] = true;
+					m_input_state[to_index(InputKey::W)] = true;
 				}
 				else {
-					m_input_state[input_event::keyboard_event::k_W] = false;
+					m_input_state[to_index(InputKey::W)] = false;
 				}
 			}
-			if (event.buttonType == 1) {
+			if (event.key_pressed == InputKey::A) {
 				if (event.buttonPressed == true) {
-					m_input_state[input_event::keyboard_event::k_A] = true;
+					m_input_state[to_index(InputKey::A)] = true;
 				}
 				else {
-					m_input_state[input_event::keyboard_event::k_A] = false;
+					m_input_state[to_index(InputKey::A)] = false;
 				}
 			}
-			if (event.buttonType == 2) {
+			if (event.key_pressed == InputKey::S) {
 				if (event.buttonPressed == true) {
-					m_input_state[input_event::keyboard_event::k_S] = true;
+					m_input_state[to_index(InputKey::S)] = true;
 				}
 				else {
-					m_input_state[input_event::keyboard_event::k_S] = false;
+					m_input_state[to_index(InputKey::S)] = false;
 				}
 			}
-			if (event.buttonType == 3) {
+			if (event.key_pressed == InputKey::D) {
 				if (event.buttonPressed == true) {
-					m_input_state[input_event::keyboard_event::k_D] = true;
+					m_input_state[to_index(InputKey::D)] = true;
 				}
 				else {
-					m_input_state[input_event::keyboard_event::k_D] = false;
+					m_input_state[to_index(InputKey::D)] = false;
 				}
 			}
-			if (event.buttonType == 4) {
+			if (event.key_pressed == InputKey::Q) {
 				Command* command;
 				command = new TeleportCommand;
 				m_commands.push_back(command);
 			}
-			if (event.buttonType == 5) {
+			if (event.key_pressed == InputKey::Space) {
 				Command* command;
 				command = new FireCommand;
 				m_commands.push_back(command);
@@ -668,10 +668,10 @@ void Game::push_input_event(InputEvent& event)
 	m_event_queue.pushEvent(event);
 }
 
-void Game::input_event(int buttonType, bool buttonPressed, sf::Vector2i pos, InputEvent& event, InputEvent::Type eventType)
+void Game::input_event(InputKey buttonType, bool buttonPressed, sf::Vector2i pos, InputEvent& event, InputEvent::Type eventType)
 {
 	event.type = eventType;
-	event.buttonType = buttonType;
+	event.key_pressed = buttonType;
 	event.buttonPressed = buttonPressed;
 	event.position = pos;
 }
@@ -688,7 +688,7 @@ void Game::teleport()
 	}
 }
 
-void Game::update_teleport_timer(std::chrono::time_point<std::chrono::system_clock> m_time)
+void Game::update_teleport_timer()
 {
 	if (!m_teleport_available)
 	{
@@ -712,10 +712,6 @@ void Game::update_teleport_timer(std::chrono::time_point<std::chrono::system_clo
 
 			m_teleport_timer_text.setString(oss.str());
 		}
-	}
-	else
-	{
-		m_teleport_timer_text.setString("00:00");
 	}
 }
 

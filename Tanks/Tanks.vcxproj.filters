@@ -191,5 +191,8 @@
     <ClInclude Include="TeleportCommand.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="InputKeys.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

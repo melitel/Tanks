@@ -32,7 +32,7 @@ void Application::run()
 				if (event.mouseButton.button == sf::Mouse::Button::Left)
 				{
 					sf::Vector2i pos = sf::Mouse::getPosition(*m_window);
-					m_game->input_event(6, true, pos, inputEvent, InputEvent::Type::MouseClick);
+					m_game->input_event(InputKey::Size, true, pos, inputEvent, InputEvent::Type::MouseClick);
 					m_game->push_input_event(inputEvent);
 				}				
 			}
@@ -41,32 +41,32 @@ void Application::run()
 			{
 				if (event.key.code == sf::Keyboard::Key::W)
 				{
-					m_game->input_event(0, true, sf::Vector2i(0,0), inputEvent, InputEvent::Type::ButtonClick);					
+					m_game->input_event(InputKey::W, true, sf::Vector2i(0,0), inputEvent, InputEvent::Type::ButtonClick);					
 					m_game->push_input_event(inputEvent);
 				}
 				if (event.key.code == sf::Keyboard::Key::A)
 				{
-					m_game->input_event(1, true, sf::Vector2i(0, 0), inputEvent, InputEvent::Type::ButtonClick);					
+					m_game->input_event(InputKey::A, true, sf::Vector2i(0, 0), inputEvent, InputEvent::Type::ButtonClick);
 					m_game->push_input_event(inputEvent);
 				}
 				if (event.key.code == sf::Keyboard::Key::S)
 				{
-					m_game->input_event(2, true, sf::Vector2i(0, 0), inputEvent, InputEvent::Type::ButtonClick);
+					m_game->input_event(InputKey::S, true, sf::Vector2i(0, 0), inputEvent, InputEvent::Type::ButtonClick);
 					m_game->push_input_event(inputEvent);
 				}
 				if (event.key.code == sf::Keyboard::Key::D)
 				{
-					m_game->input_event(3, true, sf::Vector2i(0, 0), inputEvent, InputEvent::Type::ButtonClick);
+					m_game->input_event(InputKey::D, true, sf::Vector2i(0, 0), inputEvent, InputEvent::Type::ButtonClick);
 					m_game->push_input_event(inputEvent);
 				}
 				if (event.key.code == sf::Keyboard::Key::Q)
 				{
-					m_game->input_event(4, true, sf::Vector2i(0, 0), inputEvent, InputEvent::Type::ButtonClick);
+					m_game->input_event(InputKey::Q, true, sf::Vector2i(0, 0), inputEvent, InputEvent::Type::ButtonClick);
 					m_game->push_input_event(inputEvent);
 				}
 				if (event.key.code == sf::Keyboard::Key::Space)
 				{
-					m_game->input_event(5, true, sf::Vector2i(0, 0), inputEvent, InputEvent::Type::ButtonClick);
+					m_game->input_event(InputKey::Space, true, sf::Vector2i(0, 0), inputEvent, InputEvent::Type::ButtonClick);
 					m_game->push_input_event(inputEvent);
 				}
 			}			
@@ -75,32 +75,32 @@ void Application::run()
 			{
 				if (event.key.code == sf::Keyboard::Key::W)
 				{
-					m_game->input_event(0, false, sf::Vector2i(0, 0), inputEvent, InputEvent::Type::ButtonClick);
+					m_game->input_event(InputKey::W, false, sf::Vector2i(0, 0), inputEvent, InputEvent::Type::ButtonClick);
 					m_game->push_input_event(inputEvent);
 				}
 				if (event.key.code == sf::Keyboard::Key::A)
 				{
-					m_game->input_event(1, false, sf::Vector2i(0, 0), inputEvent, InputEvent::Type::ButtonClick);
+					m_game->input_event(InputKey::A, false, sf::Vector2i(0, 0), inputEvent, InputEvent::Type::ButtonClick);
 					m_game->push_input_event(inputEvent);
 				}
 				if (event.key.code == sf::Keyboard::Key::S)
 				{
-					m_game->input_event(2, false, sf::Vector2i(0, 0), inputEvent, InputEvent::Type::ButtonClick);
+					m_game->input_event(InputKey::S, false, sf::Vector2i(0, 0), inputEvent, InputEvent::Type::ButtonClick);
 					m_game->push_input_event(inputEvent);
 				}
 				if (event.key.code == sf::Keyboard::Key::D)
 				{
-					m_game->input_event(3, false, sf::Vector2i(0, 0), inputEvent, InputEvent::Type::ButtonClick);
+					m_game->input_event(InputKey::D, false, sf::Vector2i(0, 0), inputEvent, InputEvent::Type::ButtonClick);
 					m_game->push_input_event(inputEvent);
 				}
 				if (event.key.code == sf::Keyboard::Key::Q)
 				{
-					m_game->input_event(4, false, sf::Vector2i(0, 0), inputEvent, InputEvent::Type::ButtonClick);
+					m_game->input_event(InputKey::Q, false, sf::Vector2i(0, 0), inputEvent, InputEvent::Type::ButtonClick);
 					m_game->push_input_event(inputEvent);
 				}
 				if (event.key.code == sf::Keyboard::Key::Space)
 				{
-					m_game->input_event(5, false, sf::Vector2i(0, 0), inputEvent, InputEvent::Type::ButtonClick);
+					m_game->input_event(InputKey::Space, false, sf::Vector2i(0, 0), inputEvent, InputEvent::Type::ButtonClick);
 					m_game->push_input_event(inputEvent);
 				}
 			}

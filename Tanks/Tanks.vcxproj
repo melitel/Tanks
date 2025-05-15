@@ -139,6 +139,7 @@ XCOPY $(SolutionDir)textures\ $(OutDir) /i /c /k /y /d</Command>
     <ClInclude Include="GrassTile.h" />
     <ClInclude Include="HeaderTile.h" />
     <ClInclude Include="InputEventQueue.h" />
+    <ClInclude Include="InputKeys.h" />
     <ClInclude Include="LifeBoostPowerUp.h" />
     <ClInclude Include="Observer.h" />
     <ClInclude Include="PowerUp.h" />

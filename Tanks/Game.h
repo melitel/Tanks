@@ -21,6 +21,7 @@
 #include "AnimationObserver.h"
 #include "AudioObserver.h"
 #include "InputEventQueue.h"
+#include "InputKeys.h"
 
 class Game
 {
@@ -52,8 +53,7 @@ public:
 
 		struct keyboard_event
 		{
-			enum key { k_W, k_A, k_S, k_D, k_Q, k_Space, k_size };
-			key key_pressed;
+			InputKey key_pressed;
 			bool isPressed = false;
 			bool isReleased = false;
 		};
@@ -84,9 +84,9 @@ public:
 	void projectile_shoot(Tank& tank);
 	void delete_projectile(Projectile& proj);
 	void push_input_event(InputEvent &event);
-	void input_event(int buttonType, bool buttonPressed, sf::Vector2i pos, InputEvent& event, InputEvent::Type eventType);
+	void input_event(InputKey buttonType, bool buttonPressed, sf::Vector2i pos, InputEvent& event, InputEvent::Type eventType);
 	void teleport();
-	void update_teleport_timer(std::chrono::time_point<std::chrono::system_clock> m_time);
+	void update_teleport_timer();
 	void initialize_teleport_timer();
 
 	~Game();
@@ -97,7 +97,7 @@ public:
 		gs_lose
 	};
 	game_state m_game_state;
-	using input_array = std::array<bool, input_event::keyboard_event::key::k_size>;
+	using input_array = std::array<bool, to_index(InputKey::Size)>;
 	input_array m_input_state;
 	int count_inputs(input_array inputs);
 	game_state getGameState() const {
@@ -147,8 +147,8 @@ private:
 	sf::Font m_game_font;
 
 	bool m_teleport_available = true;
-	std::uint32_t m_teleport_cooldown = 10;
-	std::chrono::time_point<std::chrono::system_clock> m_teleport_start_time{ std::chrono::system_clock::now() };
+	const std::uint32_t m_teleport_cooldown = 10;
+	std::chrono::system_clock::time_point m_teleport_start_time{};
 	std::chrono::time_point<std::chrono::system_clock> m_time{ std::chrono::system_clock::now() };
 	std::chrono::time_point<std::chrono::system_clock> m_start_time{ std::chrono::system_clock::now() };
 	std::chrono::time_point<std::chrono::system_clock> start_animation_time = std::chrono::system_clock::now();
