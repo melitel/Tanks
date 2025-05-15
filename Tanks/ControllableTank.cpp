@@ -34,22 +34,22 @@ void ControllableTank::move_controller(float delta)
 
 		second_button_index = -2;
 
-		if (g_Game->m_input_state[input_key_event.k_W] == true)
+		if (g_Game->m_input_state[InputKey::W] == true)
 		{
 			first_button_index = 0;
 			move_tank(ControllableTank::movement_direction::up, delta);
 		}
-		if (g_Game->m_input_state[input_key_event.k_A] == true)
+		if (g_Game->m_input_state[InputKey::A] == true)
 		{
 			first_button_index = 1;
 			move_tank(ControllableTank::movement_direction::left, delta);
 		}
-		if (g_Game->m_input_state[input_key_event.k_S] == true)
+		if (g_Game->m_input_state[InputKey::S] == true)
 		{
 			first_button_index = 2;
 			move_tank(ControllableTank::movement_direction::down, delta);
 		}
-		if (g_Game->m_input_state[input_key_event.k_D] == true)
+		if (g_Game->m_input_state[InputKey::D] == true)
 		{
 			first_button_index = 3;
 			move_tank(ControllableTank::movement_direction::right, delta);

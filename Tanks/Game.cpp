@@ -1,5 +1,6 @@
 #include "Game.h"
 #include "FireCommand.h"
+#include "TeleportCommand.h"
 #include <sstream>
 
 Game* g_Game = nullptr;
@@ -101,7 +102,9 @@ void Game::initialize_game_start(uint32_t window_width, uint32_t window_height)
 	m_kill_count_text.setFillColor(sf::Color::White);
 	m_kill_count_text.setPosition(sf::Vector2f(800.f, 0.f));
 	m_kill_count_text.setString("0");
-	m_kill_count_text.setFont(m_game_font);		
+	m_kill_count_text.setFont(m_game_font);	
+
+	initialize_teleport_timer();
 
 	/*for (int i = 0; i < m_ai_tanks.size(); ++i) {		
 		m_ai_tanks[i].initialize(m_ai_spawn_pos[0]);
@@ -111,6 +114,15 @@ void Game::initialize_game_start(uint32_t window_width, uint32_t window_height)
 	m_player_base.rotate_base(sf::degrees(180.f));	
 	
 	g_Game = this;
+}
+
+void Game::initialize_teleport_timer()
+{
+	m_teleport_timer_text.setCharacterSize(25);
+	m_teleport_timer_text.setFillColor(sf::Color::White);
+	m_teleport_timer_text.setPosition(sf::Vector2f(400.f, 0.f));
+	m_teleport_timer_text.setString("00:00");
+	m_teleport_timer_text.setFont(m_game_font);
 }
 
 void Game::update()
@@ -133,7 +145,8 @@ void Game::update()
 
 	if (m_game_state == game_state::gs_game_start) {
 
-		m_player_tank.update(delta, 0);		
+		m_player_tank.update(delta, 0);
+		update_teleport_timer();
 
 		if (!m_ai_tanks.empty()) {
 			for (int i = 0; i < m_ai_tanks.size(); ++i) {
@@ -332,6 +345,7 @@ void Game::draw(std::unique_ptr<sf::RenderWindow>& window)
 		window->draw(m_kill_count_icon);
 		window->draw(m_kill_count_text);
 		window->draw(m_life_text);
+		window->draw(m_teleport_timer_text);
 		if (!m_boosts.empty())
 		{
 			for (int j = 0; j < m_boosts.size(); ++j)
@@ -393,39 +407,44 @@ void Game::process_input()
 			break;
 		case InputEvent::Type::ButtonClick:
 			// ... Handle key pressed event ...
-			if (event.buttonType == 0) {
+			if (event.key_pressed == InputKey::W) {
 				if (event.buttonPressed == true) {
-					m_input_state[input_event::keyboard_event::k_W] = true;
+					m_input_state[InputKey::W] = true;
 				}
 				else {
-					m_input_state[input_event::keyboard_event::k_W] = false;
+					m_input_state[InputKey::W] = false;
 				}
 			}
-			if (event.buttonType == 1) {
+			if (event.key_pressed == InputKey::A) {
 				if (event.buttonPressed == true) {
-					m_input_state[input_event::keyboard_event::k_A] = true;
+					m_input_state[InputKey::A] = true;
 				}
 				else {
-					m_input_state[input_event::keyboard_event::k_A] = false;
+					m_input_state[InputKey::A] = false;
 				}
 			}
-			if (event.buttonType == 2) {
+			if (event.key_pressed == InputKey::S) {
 				if (event.buttonPressed == true) {
-					m_input_state[input_event::keyboard_event::k_S] = true;
+					m_input_state[InputKey::S] = true;
 				}
 				else {
-					m_input_state[input_event::keyboard_event::k_S] = false;
+					m_input_state[InputKey::S] = false;
 				}
 			}
-			if (event.buttonType == 3) {
+			if (event.key_pressed == InputKey::D) {
 				if (event.buttonPressed == true) {
-					m_input_state[input_event::keyboard_event::k_D] = true;
+					m_input_state[InputKey::D] = true;
 				}
 				else {
-					m_input_state[input_event::keyboard_event::k_D] = false;
+					m_input_state[InputKey::D] = false;
 				}
 			}
-			if (event.buttonType == 4) {
+			if (event.key_pressed == InputKey::Q) {
+				Command* command;
+				command = new TeleportCommand;
+				m_commands.push_back(command);
+			}
+			if (event.key_pressed == InputKey::Space) {
 				Command* command;
 				command = new FireCommand;
 				m_commands.push_back(command);
@@ -649,12 +668,51 @@ void Game::push_input_event(InputEvent& event)
 	m_event_queue.pushEvent(event);
 }
 
-void Game::input_event(int buttonType, bool buttonPressed, sf::Vector2i pos, InputEvent& event, InputEvent::Type eventType)
+void Game::input_event(InputKey buttonType, bool buttonPressed, sf::Vector2i pos, InputEvent& event, InputEvent::Type eventType)
 {
 	event.type = eventType;
-	event.buttonType = buttonType;
+	event.key_pressed = buttonType;
 	event.buttonPressed = buttonPressed;
 	event.position = pos;
+}
+
+void Game::teleport()
+{
+	if (m_teleport_available)
+	{
+		sf::Vector2f teleport_pos = get_base_position();
+		m_player_tank.set_position(teleport_pos);
+
+		m_teleport_start_time = std::chrono::system_clock::now();
+		m_teleport_available = false;
+	}
+}
+
+void Game::update_teleport_timer()
+{
+	if (!m_teleport_available)
+	{
+		auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(m_time - m_teleport_start_time).count();
+
+		int remaining = static_cast<int>(m_teleport_cooldown) - static_cast<int>(elapsed);
+
+		if (remaining <= 0)
+		{
+			m_teleport_available = true;
+			m_teleport_timer_text.setString("00:00");
+		}
+		else
+		{
+			int minutes = remaining / 60;
+			int seconds = remaining % 60;
+
+			std::ostringstream oss;
+			oss << std::setfill('0') << std::setw(2) << minutes << ":"
+				<< std::setfill('0') << std::setw(2) << seconds;
+
+			m_teleport_timer_text.setString(oss.str());
+		}
+	}
 }
 
 sf::Vector2f Game::separating_axis(const Tank& ai_tank, const Tank& player_tank, sf::Vector2f player_pos) {
